@@ -10,7 +10,7 @@ prepare_react_native_project!
 
 linkage = ENV['USE_FRAMEWORKS']
 if linkage != nil
-  Pod::UI.puts "Configuring Pod with #{linkage}ally linked Frameworks".#08B341
+  Pod::UI.puts "Configuring Pod with #{linkage}ally linked Frameworks".#85360B
   use_frameworks! :linkage => linkage.to_sym
 end
 

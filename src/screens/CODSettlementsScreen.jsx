@@ -99,7 +99,7 @@ const CODSettlementsScreen = () => {
               <MaterialCommunityIcons
                 name="image-outline"
                 size={22}
-                color="#08B341"
+                color="#85360B"
               />
               <Text style={styles.viewImageText}>payment image</Text>
             </TouchableOpacity>
@@ -129,7 +129,7 @@ const CODSettlementsScreen = () => {
               <MaterialCommunityIcons
                 name="shield-check-outline"
                 size={14}
-                color="#08B341"
+                color="#85360B"
               />
               <Text style={styles.historyOtpText}>
                 {item.cod_settlement_otp || '---'}
@@ -155,7 +155,7 @@ const CODSettlementsScreen = () => {
             )}
           </View>
           {/* <View style={styles.iconCircle}>
-              <MaterialCommunityIcons name="wallet" size={24} color="#08B341" />
+              <MaterialCommunityIcons name="wallet" size={24} color="#85360B" />
            </View> */}
         </View>
 
@@ -200,7 +200,7 @@ const CODSettlementsScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar backgroundColor="#08B341" barStyle="light-content" />
+      <StatusBar backgroundColor="#85360B" barStyle="light-content" />
 
       {/* Professional Navbar */}
       <View style={styles.navbar}>
@@ -215,7 +215,7 @@ const CODSettlementsScreen = () => {
 
       {loading ? (
         <View style={styles.loaderContainer}>
-          <ActivityIndicator size="large" color="#08B341" />
+          <ActivityIndicator size="large" color="#85360B" />
         </View>
       ) : (
         <FlatList
@@ -229,8 +229,8 @@ const CODSettlementsScreen = () => {
             <RefreshControl
               refreshing={refreshing}
               onRefresh={onRefresh}
-              colors={['#08B341']}
-              tintColor="#08B341"
+              colors={['#85360B']}
+              tintColor="#85360B"
             />
           }
           ListEmptyComponent={
@@ -285,7 +285,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingVertical: verticalScale(14),
     paddingHorizontal: wp(5),
-    backgroundColor: '#08B341',
+    backgroundColor: '#85360B',
     elevation: 4,
     shadowColor: '#000',
     shadowOffset: {width: 0, height: 2},
@@ -318,12 +318,12 @@ const styles = StyleSheet.create({
 
   // --- Premium Summary Card ---
   summaryCard: {
-    backgroundColor: '#08B341', // Brand Green
+    backgroundColor: '#85360B', // Brand Green
     borderRadius: 20,
     padding: moderateScale(20),
     marginBottom: verticalScale(20),
     // Sophisticated Shadow
-    shadowColor: '#08B341',
+    shadowColor: '#85360B',
     shadowOffset: {width: 0, height: 8},
     shadowOpacity: 0.25,
     shadowRadius: 12,
@@ -509,7 +509,7 @@ const styles = StyleSheet.create({
   historyOtpText: {
     fontSize: scale(13),
     fontWeight: '700',
-    color: '#08B341',
+    color: '#85360B',
     marginLeft: 4,
   },
 
@@ -538,7 +538,7 @@ const styles = StyleSheet.create({
   },
   viewImageText: {
     fontSize: scale(10),
-    color: '#08B341',
+    color: '#85360B',
     fontWeight: '600',
     marginLeft: 4,
   },

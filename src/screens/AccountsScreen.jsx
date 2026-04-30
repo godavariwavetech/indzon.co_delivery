@@ -153,7 +153,7 @@ const AccountsScreen = () => {
                 <Text style={styles.methodText}>Cash in Hand</Text>
                 <View style={styles.paymentDetails}>
                   <Text style={styles.detailText}>-</Text>
-                  <Text style={[styles.detailText, { color: '#08B341' }]}>
+                  <Text style={[styles.detailText, { color: '#85360B' }]}>
                     ₹{paymentSummary.cod_amount}
                   </Text>
                 </View>
@@ -233,7 +233,7 @@ const AccountsScreen = () => {
                   <Text style={[styles.detailText, { color: '#999', textDecorationLine: 'line-through' }]}>
                     ₹{paymentSummary.delivery_charges}
                   </Text>
-                  <Text style={[styles.detailText, { color: '#08B341', marginLeft: 8 }]}>
+                  <Text style={[styles.detailText, { color: '#85360B', marginLeft: 8 }]}>
                     ₹{(paymentSummary.delivery_charges - (0)).toFixed(2)}
                   </Text>
                 </View>
@@ -251,7 +251,7 @@ const AccountsScreen = () => {
                   <Text style={styles.detailText}>
                     {paymentSummary.cod_count} orders
                   </Text>
-                  <Text style={[styles.detailText, {color: '#08B341'}]}>
+                  <Text style={[styles.detailText, {color: '#85360B'}]}>
                     ₹{paymentSummary.cod_amount?.toFixed(0)}
                   </Text>
                 </View>
@@ -267,7 +267,7 @@ const AccountsScreen = () => {
                     style={[
                       styles.detailText,
                       styles.finalAmount,
-                      {color: paymentSummary?.total_deliveryboy_amount >= 0 ? '#08B341' : '#dc3545'},
+                      {color: paymentSummary?.total_deliveryboy_amount >= 0 ? '#85360B' : '#dc3545'},
                     ]}>
                     ₹ {paymentSummary?.total_deliveryboy_amount >= 0 ? '+' : '-'}
                     {paymentSummary?.total_deliveryboy_amount}
@@ -299,7 +299,7 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#08B341',
+    backgroundColor: '#85360B',
     padding: 15,
     marginBottom: 10,
   },
@@ -580,7 +580,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   settleButton: {
-    backgroundColor: '#08B341',
+    backgroundColor: '#85360B',
     borderRadius: 8,
     padding: 16,
     alignItems: 'center',

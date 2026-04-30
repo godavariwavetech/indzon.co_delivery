@@ -1,4 +1,4 @@
-package com.varadhipartner
+package com.amaraadelivery
 
 import com.facebook.react.ReactActivity
 import com.facebook.react.ReactActivityDelegate

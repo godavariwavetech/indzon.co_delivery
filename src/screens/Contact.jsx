@@ -104,7 +104,7 @@ const ContactUsScreen = () => {
             {/* WhatsApp Button */}
             <TouchableOpacity style={styles.option} onPress={handleWhatsAppPress}>
               <View style={{ flexDirection: 'row', gap: 10 }}>
-                <Ionicons name="logo-whatsapp" size={24} color="#08B341" />
+                <Ionicons name="logo-whatsapp" size={24} color="#85360B" />
                 <Text style={styles.optionText}>Message on WhatsApp</Text>
               </View>
             </TouchableOpacity>
@@ -112,7 +112,7 @@ const ContactUsScreen = () => {
             {/* Call Button */}
             <TouchableOpacity style={styles.option} onPress={handleCallPress}>
               <View style={{ flexDirection: 'row', gap: 10 }}>
-                <Ionicons name="call-outline" size={24} color="#08B341" />
+                <Ionicons name="call-outline" size={24} color="#85360B" />
                 <Text style={styles.optionText}>Call Us</Text>
               </View>
             </TouchableOpacity>
@@ -120,7 +120,7 @@ const ContactUsScreen = () => {
             {/* Email Button */}
             <TouchableOpacity style={styles.option} onPress={handleEmailPress}>
               <View style={{ flexDirection: 'row', gap: 10 }}>
-                <Ionicons name="mail-outline" size={24} color="#08B341" />
+                <Ionicons name="mail-outline" size={24} color="#85360B" />
                 <Text style={styles.optionText}>Send an Email</Text>
               </View>
             </TouchableOpacity>
@@ -140,7 +140,7 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#08B341',
+    backgroundColor: '#85360B',
     padding: 15,
   },
   headerTitle: {

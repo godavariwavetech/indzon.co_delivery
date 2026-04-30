@@ -3,7 +3,8 @@ import {Alert} from 'react-native';
 
 // Base API URL
 
-const API_BASE_URL ='https://varadhifood.com:2636/delivery_boy'
+// const API_BASE_URL ='https://varadhifood.com:2636/delivery_boy'
+const API_BASE_URL = 'https://apiamara.godavariwave.com/delivery_boy'
 
 // Create Axios instance
 const apiClient = axios.create({

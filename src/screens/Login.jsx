@@ -123,7 +123,7 @@ const LoginScreen = ({ navigation }) => {
           <View style={styles.container}>
       <StatusBar backgroundColor="#fff" barStyle="dark-content" />
             <Image
-        source={require('../assets/foodtrail_delivery.png')}
+        source={require('../assets/amaraa.png')}
               style={styles.logo}
               resizeMode="contain"
             />
@@ -181,7 +181,7 @@ const LoginScreen = ({ navigation }) => {
           <Icon
             name={isAgreed ? 'checkbox-marked' : 'checkbox-blank-outline'}
             size={24}
-            color={isAgreed ? '#08B341' : 'gray'}
+            color={isAgreed ? '#85360B' : 'gray'}
           />
         </TouchableOpacity>
         <Text style={styles.agreementText}>
@@ -205,7 +205,7 @@ const LoginScreen = ({ navigation }) => {
             </TouchableOpacity>
 
       <TouchableOpacity onPress={() => navigation.navigate('Registration')}>
-        <Text style={{ color: '#08B341', marginTop: verticalScale(20) }}>
+        <Text style={{ color: '#85360B', marginTop: verticalScale(20) }}>
           Don't have an account? Register
         </Text>
       </TouchableOpacity>
@@ -274,7 +274,7 @@ const styles = StyleSheet.create({
   },
   loginButton: {
     width: '100%',
-    backgroundColor: '#08B341',
+    backgroundColor: '#85360B',
     paddingVertical: verticalScale(12),
     borderRadius: moderateScale(10),
     alignItems: 'center',
@@ -304,7 +304,7 @@ const styles = StyleSheet.create({
     marginBottom: verticalScale(15),
   },
   forgotPasswordText: {
-    color: '#08B341',
+    color: '#85360B',
     fontSize: scale(12),
   },
   agreementContainer: {
@@ -322,7 +322,7 @@ const styles = StyleSheet.create({
     color: '#333',
   },
   linkText: {
-    color: '#08B341',
+    color: '#85360B',
     fontWeight: 'bold',
     textDecorationLine: 'underline',
   },

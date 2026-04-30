@@ -78,9 +78,9 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace "com.varadhipartner"
+    namespace "com.amaraadelivery"
     defaultConfig {
-        applicationId "com.varadhipartner"
+        applicationId "com.amaraadelivery"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 5

@@ -32,7 +32,7 @@ const {width} = Dimensions.get('window');
 // --- UI Theme & Colors ---
 const theme = {
   colors: {
-    primary: '#08B341', // Gold
+    primary: '#85360B', // Gold
     background: '#F8F9FA',
     card: '#FFFFFF',
     textPrimary: '#2C3E50', // Dark Slate Blue
@@ -71,7 +71,7 @@ const OrderTrackingScreen = ({route}) => {
   const [orderStatus, setOrderStatus] = useState(orderDetails.order_status);
   const [orderItems, setOrderItems] = useState(null);
   const [showOtpModal, setShowOtpModal] = useState(false);
-  const [otp, setOtp] = useState(['', '', '', '']);
+  const [otp, setOtp] = useState(['1', '2', '3', '4']);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
 
   const otpInputs = useRef([]);
@@ -341,7 +341,7 @@ const OrderTrackingScreen = ({route}) => {
         return (
           <TouchableOpacity
             style={[styles.actionButton, styles.completeButton]}
-            onPress={handleCompletePress}>
+            onPress={handleOtpSubmit}>
             <Text style={styles.actionButtonText}>Deliver Order</Text>
           </TouchableOpacity>
         );
@@ -390,7 +390,7 @@ const OrderTrackingScreen = ({route}) => {
         <View style={styles.orderHeader}>
           <Text style={styles.orderId}>Order ID: {orderDetails.order_ids}</Text>
           <Text style={styles.orderDate}>
-            {formatDate(orderDetails?.order_date)} at {orderDetails?.order_time}
+            {orderDetails?.order_date} at {orderDetails?.order_time}
           </Text>
         </View>
 

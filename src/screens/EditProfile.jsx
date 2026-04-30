@@ -161,7 +161,7 @@ const EditProfileScreen = () => {
         </View>
 
         {/* Update Profile Button */}
-        <TouchableOpacity style={[{ position: "absolute", bottom: hp("3%") }, commonstyles.button, { backgroundColor: "#08B341" }]} onPress={handleUpdateProfile}>
+        <TouchableOpacity style={[{ position: "absolute", bottom: hp("3%") }, commonstyles.button, { backgroundColor: "#85360B" }]} onPress={handleUpdateProfile}>
           {
             loader ? <ActivityIndicator size="small" color="#fff" /> : (
               <Text style={commonstyles.buttontext}>Update Profile</Text>
@@ -187,7 +187,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     width: "100%",
     paddingVertical: hp("1%"),
-    backgroundColor: "#08B341",
+    backgroundColor: "#85360B",
     padding: scale(20),
   },
   headerText: {
@@ -218,7 +218,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: 0,
     right: 0,
-    backgroundColor: "#08B341",
+    backgroundColor: "#85360B",
     borderRadius: hp("4%"),
     padding: hp("1%"),
   },

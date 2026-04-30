@@ -9,7 +9,9 @@ const OrderCard = ({ order, onPress, onAccept }) => {
     const [showConfirm, setShowConfirm] = useState(false);
 
   const formatDate = (dateString) => {
+    if (!dateString) return 'N/A';
     const date = new Date(dateString);
+     if (isNaN(date.getTime())) return 'N/A';
     return new Intl.DateTimeFormat("en-US", {
       month: "short",
       day: "2-digit",
@@ -38,7 +40,7 @@ const OrderCard = ({ order, onPress, onAccept }) => {
         </View>
         <View style={styles.timeContainer}>
           <Ionicons name="time-outline" size={16} color="#555" />
-          <Text style={styles.timeText}>{formatDate(order?.order_date)} {order?.order_time}</Text>
+          <Text style={styles.timeText}>{order?.order_date} {order?.order_time}</Text>
         </View>
 
         <Separator />
@@ -50,7 +52,7 @@ const OrderCard = ({ order, onPress, onAccept }) => {
             <Text style={styles.infoText} numberOfLines={1}>{order.shop_name}</Text>
           </View>
           <View style={styles.infoRow}>
-            <FontAwesome5 name="location-arrow" size={15} color="#08B341" />
+            <FontAwesome5 name="location-arrow" size={15} color="#85360B" />
             <Text style={styles.infoText} numberOfLines={2}>
               {order.delivery_address}
             </Text>

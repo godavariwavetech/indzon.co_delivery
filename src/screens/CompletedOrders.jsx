@@ -240,7 +240,7 @@ const CompletedOrdersScreen = ({ navigation }) => {
         </View>
 
         {loading ? (
-          <ActivityIndicator size="large" color="#08B341" />
+          <ActivityIndicator size="large" color="#85360B" />
         ) : completedOrders.length === 0 ? (
           <Text style={styles.noOrdersText}>No orders found</Text>
         ) : (
@@ -292,11 +292,11 @@ const CompletedOrdersScreen = ({ navigation }) => {
 
                   <View style={styles.column}>
                     <View style={styles.row}>
-                      <Ionicons name="location-outline" size={wp(6)} color="#08B341" />
+                      <Ionicons name="location-outline" size={wp(6)} color="#85360B" />
                       <Text style={styles.location}>{item.shop_name}</Text>
                     </View>
                     <View style={styles.row}>
-                      <Icon name="location-arrow" size={wp(5)} color="#08B341" />
+                      <Icon name="location-arrow" size={wp(5)} color="#85360B" />
                       <Text style={styles.location}>{item.delivery_address}</Text>
                     </View>
                   </View>
@@ -329,7 +329,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: hp(2),
     elevation: 4,
-    backgroundColor: "#08B341"
+    backgroundColor: "#85360B"
   },
   headerTitle: {
     fontSize: wp(5),
@@ -393,7 +393,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
     color: "green",
-    color: "#08B341",
+    color: "#85360B",
   },
   separator: {
     height: 1,
@@ -444,7 +444,7 @@ const styles = StyleSheet.create({
   },
   searchButton: {
     backgroundColor: '#28a745',
-    backgroundColor: '#08B341',
+    backgroundColor: '#85360B',
     paddingVertical: 12,
     alignItems: 'center',
     borderRadius: 5,
