@@ -1,3 +1,4 @@
+import palette from '../theme/colors';
 import React, { useState, useRef, useContext } from 'react';
 import {
   View,
@@ -115,7 +116,7 @@ const ForgotPassword = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <StatusBar backgroundColor="#fff" barStyle="dark-content" />
+      <StatusBar backgroundColor={palette.surface} barStyle="dark-content" />
       <Image
         source={require('../assets/foodtrail_delivery.png')}
         style={styles.logo}
@@ -149,7 +150,7 @@ const ForgotPassword = ({ navigation }) => {
         {!isVerified ? (
           <TouchableOpacity style={styles.loginButton} onPress={handleVerifyMobile} disabled={loading}>
             {loading ? (
-              <ActivityIndicator size="small" color="#fff" />
+              <ActivityIndicator size="small" color={palette.surface} />
             ) : (
               <Text style={styles.loginText}>Verify Number</Text>
             )}
@@ -212,7 +213,7 @@ const ForgotPassword = ({ navigation }) => {
               disabled={!isSubmitEnabled || loading}
             >
               {loading ? (
-                <ActivityIndicator size="small" color="#fff" />
+                <ActivityIndicator size="small" color={palette.surface} />
               ) : (
                 <Text style={styles.loginText}>Reset Password</Text>
               )}
@@ -233,7 +234,7 @@ const ForgotPassword = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: palette.surface,
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: moderateScale(20),
@@ -250,25 +251,25 @@ const styles = StyleSheet.create({
   input: {
     height: verticalScale(45),
     borderWidth: 1,
-    borderColor: '#e0e0e0',
+    borderColor: palette.border,
     borderRadius: moderateScale(10),
     padding: moderateScale(10),
-    backgroundColor: '#f5f5f5',
+    backgroundColor: palette.background,
     marginBottom: verticalScale(10),
     fontSize: scale(14),
     color: '#000',
   },
   input2: {
-    backgroundColor: '#f5f5f5',
+    backgroundColor: palette.background,
     fontSize: scale(14),
     color: '#000',
   },
   inputError: {
-    borderColor: 'red',
-    backgroundColor: '#fff0f0',
+    borderColor: palette.danger,
+    backgroundColor: palette.dangerSoft,
   },
   errorText: {
-    color: 'red',
+    color: palette.danger,
     fontSize: scale(12),
     marginBottom: verticalScale(5),
     padding: moderateScale(5),
@@ -276,17 +277,17 @@ const styles = StyleSheet.create({
   },
   loginButton: {
     width: '100%',
-    backgroundColor: '#85360B',
+    backgroundColor: palette.primary,
     paddingVertical: verticalScale(12),
     borderRadius: moderateScale(10),
     alignItems: 'center',
     marginBottom: verticalScale(10),
   },
   disabledButton: {
-    backgroundColor: '#ccc',
+    backgroundColor: palette.disabled,
   },
   loginText: {
-    color: '#fff',
+    color: palette.surface,
     fontSize: scale(16),
     fontWeight: 'bold',
   },
@@ -294,10 +295,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#e0e0e0',
+    borderColor: palette.border,
     borderRadius: moderateScale(10),
     paddingHorizontal: moderateScale(10),
-    backgroundColor: '#f5f5f5',
+    backgroundColor: palette.background,
     marginBottom: verticalScale(10),
     height: verticalScale(45),
   },

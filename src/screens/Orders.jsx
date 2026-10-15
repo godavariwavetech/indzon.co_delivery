@@ -1,3 +1,5 @@
+import palette from '../theme/colors';
+import {subscribeDemo} from '../services/demoService';
 import React, {useState, useEffect, useContext, useCallback} from 'react';
 import {
   View,
@@ -7,9 +9,6 @@ import {
   StatusBar,
   Alert,
   RefreshControl,
-  PermissionsAndroid,
-  Linking,
-  Platform,
   TouchableOpacity,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
@@ -24,8 +23,7 @@ import ApiService from '../services/apiservice';
 import ToggleSwitch from '../components/ToggleSwitch';
 import {AuthContext} from '../context/AuthContext';
 import OrderCard from '../components/orderCard'; // Corrected import name
-import {getTokenValue} from '../NotificationService';
-import Geolocation from 'react-native-geolocation-service';
+
 
 const OrdersScreen = ({navigation}) => {
   const {user} = useContext(AuthContext);
@@ -39,147 +37,10 @@ const OrdersScreen = ({navigation}) => {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [activeTab, setActiveTab] = useState('new');
-  const [deliveryBoylocationId, setDeliveryBoyLocationId] = useState(null);
   const [driverLocation, setDriverLocation] = useState({
     latitude: null,
     longitude: null,
   });
-
-  const uploadToken = async () => {
-    const token = await getTokenValue();
-    console.log(token,">>>>>>>>>>>")
-    await ApiService.uploadFcmToken(
-      token,
-      user?.id,
-      user?.delivery_boy_location_id,
-    );
-    setDeliveryBoyLocationId(user?.delivery_boy_location_id);
-  };
-
-  const requestPermission = async () => {
-    if (Platform.OS === 'android') {
-      try {
-        const granted = await PermissionsAndroid.request(
-          PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
-          {
-            title: 'Location Access Required',
-            message: 'This app needs your location.',
-            buttonPositive: 'OK',
-            buttonNegative: 'Cancel',
-          },
-        );
-        return granted === PermissionsAndroid.RESULTS.GRANTED;
-      } catch (err) {
-        console.warn('Permission error:', err);
-        return false;
-      }
-    }
-    return true;
-  };
-
-  useFocusEffect(
-    useCallback(() => {
-      let intervalId = null;
-      const getLocation = async () => {
-        const hasPermission = await requestPermission();
-        if (!hasPermission) {
-          Alert.alert(
-            'Location Permission Denied',
-            'Please enable location permission in your settings.',
-            [
-              {text: 'Open Settings', onPress: () => Linking.openSettings()},
-              {text: 'Cancel', style: 'cancel'},
-            ],
-          );
-          return false;
-        }
-        return true;
-      };
-      const fetchLocation = () => {
-        Geolocation.getCurrentPosition(
-          position => {
-            const {latitude, longitude} = position.coords;
-            setDriverLocation({latitude, longitude});
-          },
-          error =>
-            console.log(
-              '❌ Error getting location:',
-              error.code,
-              error.message,
-            ),
-          {enableHighAccuracy: true, timeout: 15000, maximumAge: 10000},
-        );
-      };
-      const startLocationTracking = async () => {
-        if (toggle === 1) {
-          const permissionGranted = await getLocation();
-          if (!permissionGranted) return;
-          fetchLocation();
-          intervalId = setInterval(fetchLocation, 10000);
-        }
-      };
-      startLocationTracking();
-      return () => {
-        if (intervalId !== null) clearInterval(intervalId);
-      };
-    }, [toggle, user, deliveryBoylocationId]),
-  );
-
-  // Function to sync toggle state with server
-  const syncToggleWithServer = async () => {
-    try {
-      fetchOrders(true);
-      const profileData = await ApiService.getProfileData(user);
-      const serverStatus =
-        profileData?.data?.data?.[0]?.delivery_boy_active_status;
-      const newToggleState = serverStatus === 0 ? 1 : 0;
-
-      console.log(
-        'Orders - Server status:',
-        serverStatus,
-        'Current toggle:',
-        toggle,
-        'New toggle:',
-        newToggleState,
-      );
-
-      if (newToggleState !== toggle) {
-        console.log(
-          'Orders - Updating toggle from server:',
-          toggle,
-          '->',
-          newToggleState,
-        );
-        setToggle(newToggleState);
-      }
-    } catch (error) {
-      console.error('Orders - Error syncing with server:', error);
-    }
-  };
-
-  useEffect(() => {
-    if (!user?.id) return;
-
-    // Initial sync
-    syncToggleWithServer();
-
-    // Set up interval for polling every 2 seconds
-    const intervalId = setInterval(syncToggleWithServer, 2000);
-
-    // Cleanup interval on unmount
-    return () => {
-      clearInterval(intervalId);
-    };
-  }, [user?.id, toggle]);
-
-  useEffect(() => {
-    if (user?.id) {
-      fetchOrders();
-      uploadToken();
-    }
-  }, [user]);
-
-  console.log(orders, '>>>>>>>>>>>>>>>>>>>>>>>>>>orders');
 
   useEffect(() => {
     const ongoingOrders = orders?.filter(
@@ -195,11 +56,25 @@ const OrdersScreen = ({navigation}) => {
         !showLoad && setRefreshing(true);
 
         const response = await ApiService.getOrders(user);
+        if (__DEV__) {
+          console.log('[Home] Orders API response:', JSON.stringify(response, null, 2));
+        }
         if (response?.status === 200) {
           setOrders(response.data);
 
           const newOrdersData = response?.new_orders || [];
           const ongoingOrdersData = response?.active_orders || [];
+
+          if (__DEV__) {
+            console.log(
+              '[Home] Screen data:',
+              JSON.stringify(
+                {newOrders: newOrdersData, ongoingOrders: ongoingOrdersData},
+                null,
+                2,
+              ),
+            );
+          }
 
           setNewOrders(newOrdersData);
           setOngoingOrders(ongoingOrdersData);
@@ -221,35 +96,17 @@ const OrdersScreen = ({navigation}) => {
     }, [fetchOrders]),
   );
 
+  useEffect(() => subscribeDemo(() => {
+    fetchOrders(true);
+    ApiService.getProfileData().then(response => {
+      setToggle(response.data.data[0].delivery_boy_active_status === 0 ? 1 : 0);
+    });
+  }), [fetchOrders]);
   const handleAccept = async orderId => {
-    // Optimistically update UI
-    setOrders(prevOrders =>
-      prevOrders?.map(order =>
-        order.order_ids === orderId ? {...order, order_status: 8} : order,
-      ),
-    );
-    // Call API to accept order in the background
-    const payload = {
-      deliveryarr: [user],
-      id: user.id,
-      order_status: 8,
-      order_id: orderId,
-    };
-
-    // console.log(payload,"++++++++++++++++++++>>>>>>>>PAUAYAYAYA");
-    // return
-
     try {
-      await ApiService.acceptorders(payload);
-    } catch (error) {
-      // Revert UI change on API failure
-      Alert.alert('Error', 'Failed to accept the order. Please try again.');
-      setOrders(prevOrders =>
-        prevOrders?.map(order =>
-          order.order_ids === orderId ? {...order, order_status: 1} : order,
-        ),
-      );
-    }
+      await ApiService.acceptorders({order_id: orderId});
+      await fetchOrders(true);
+    } catch (error) { Alert.alert('Error', error.message); }
   };
 
   const handleComplete = orderId => {
@@ -286,7 +143,7 @@ const OrdersScreen = ({navigation}) => {
 
   return (
     <>
-      <StatusBar backgroundColor="#85360B" barStyle="light-content" />
+      <StatusBar backgroundColor={palette.primary} barStyle="light-content" />
       <View style={styles.header}>
         <View style={{flex: 1, flexDirection: 'row', alignItems: 'center'}}>
           <TouchableOpacity onPress={() => navigation.openDrawer()}>
@@ -308,8 +165,8 @@ const OrdersScreen = ({navigation}) => {
 
       <ScrollView
         showsVerticalScrollIndicator={false}
-        style={{flex: 1, backgroundColor: '#F8F9FA'}}>
-        <View style={{backgroundColor: '#F8F9FA', flex: 1}}>
+        style={{flex: 1, backgroundColor: palette.background}}>
+        <View style={{backgroundColor: palette.background, flex: 1}}>
           <View style={styles.tabContainer}>
             <TouchableOpacity
               style={[
@@ -385,13 +242,13 @@ const OrdersScreen = ({navigation}) => {
 };
 
 const styles = StyleSheet.create({
-  container: {flex: 1, paddingHorizontal: wp(2), backgroundColor: '#f8f9fa'}, // Adjusted padding
+  container: {flex: 1, paddingHorizontal: wp(2), backgroundColor: palette.background}, // Adjusted padding
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: verticalScale(15),
     paddingHorizontal: wp(3),
-    backgroundColor: '#85360B',
+    backgroundColor: palette.primary,
   },
   headerTitle: {
     fontSize: scale(18),
@@ -427,11 +284,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginVertical: hp(1),
-    backgroundColor: '#fff',
+    backgroundColor: palette.surface,
     borderRadius: moderateScale(8),
     padding: moderateScale(4),
     marginHorizontal: wp(3),
-    elevation: 6,
+    elevation: 2,
     shadowColor: '#000',
     shadowOffset: {width: 0, height: 1},
     shadowOpacity: 0.1,
@@ -446,15 +303,15 @@ const styles = StyleSheet.create({
     borderRadius: moderateScale(6),
   },
   activeTab: {
-    backgroundColor: '#85360B',
+    backgroundColor: palette.primarySoft,
   },
   tabText: {
     fontSize: scale(14),
     fontWeight: '600',
-    color: '#333',
+    color: palette.text,
   },
   activeTabText: {
-    color: '#fff',
+    color: palette.primary,
   },
 });
 

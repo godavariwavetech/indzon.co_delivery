@@ -1,7 +1,8 @@
+import palette from '../theme/colors';
 import React from 'react';
 import { View, StyleSheet, useWindowDimensions } from 'react-native';
 
-const Separator = ({ height = 1, color = '#E0E0E0', marginVertical = 10, width = '100%' }) => {
+const Separator = ({ height = 1, color = palette.border, marginVertical = 10, width = '100%' }) => {
   const { width: screenWidth } = useWindowDimensions(); // Get the screen width dynamically
 
   return (

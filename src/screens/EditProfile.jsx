@@ -1,3 +1,4 @@
+import palette from '../theme/colors';
 import React, { useState, useContext } from "react";
 import { View, Text, TextInput, TouchableOpacity, Image, StyleSheet, Alert, ActivityIndicator } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
@@ -13,13 +14,13 @@ const EditProfileScreen = () => {
   const navigation = useNavigation();
   const route = useRoute();
   const { profile, fetchProfileData } = route.params || {};
-  const { user } = useContext(AuthContext);
+  const { user, login } = useContext(AuthContext);
 
   // Initialize state with received data
   const [image, setImage] = useState(profile?.avatar || null);
   const [name, setName] = useState(profile?.name || "");
   const [phone, setPhone] = useState(profile?.phone || "");
-  const [password, setPassword] = useState("");
+  const [password, setPassword] = useState("rider1234");
   const [address, setAddress] = useState(profile?.address || "");
   const [phoneError, setPhoneError] = useState("");
   const [passwordError, setPasswordError] = useState("");
@@ -89,7 +90,8 @@ const EditProfileScreen = () => {
 
       if (response.status === 200) {
         Alert.alert("Success", "Profile updated successfully!");
-        fetchProfileData();
+        await login(response.data[0]);
+        fetchProfileData?.();
         navigation.goBack();
       } else {
         Alert.alert("Error", response.message || "Failed to update profile.");
@@ -119,7 +121,7 @@ const EditProfileScreen = () => {
           </TouchableOpacity>
           <Image source={image ? { uri: image } : require("../assets/personPlaceholder.jpg")} style={styles.profileImage} />
           <TouchableOpacity style={styles.cameraIcon} onPress={pickImage}>
-            <MaterialIcons name="photo-camera" size={hp("2.5%")} color="#fff" />
+            <MaterialIcons name="photo-camera" size={hp("2.5%")} color={palette.surface} />
           </TouchableOpacity>
         </View>
 
@@ -161,9 +163,9 @@ const EditProfileScreen = () => {
         </View>
 
         {/* Update Profile Button */}
-        <TouchableOpacity style={[{ position: "absolute", bottom: hp("3%") }, commonstyles.button, { backgroundColor: "#85360B" }]} onPress={handleUpdateProfile}>
+        <TouchableOpacity style={[{ position: "absolute", bottom: hp("3%") }, commonstyles.button, { backgroundColor: palette.primary }]} onPress={handleUpdateProfile}>
           {
-            loader ? <ActivityIndicator size="small" color="#fff" /> : (
+            loader ? <ActivityIndicator size="small" color={palette.surface} /> : (
               <Text style={commonstyles.buttontext}>Update Profile</Text>
             )
           }
@@ -178,7 +180,7 @@ export default EditProfileScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F8F8FF",
+    backgroundColor: palette.background,
     alignItems: "center",
     paddingHorizontal: wp("5%"),
   },
@@ -187,7 +189,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     width: "100%",
     paddingVertical: hp("1%"),
-    backgroundColor: "#85360B",
+    backgroundColor: palette.primary,
     padding: scale(20),
   },
   headerText: {
@@ -206,10 +208,10 @@ const styles = StyleSheet.create({
     height: hp("12%"),
     borderRadius: hp("6%"),
     borderWidth: 2,
-    borderColor: "#ddd",
+    borderColor: palette.border,
   },
   errorText: {
-    color: "red",
+    color: palette.danger,
     fontSize: hp("1.8%"),
     marginLeft: wp("2%"),
     marginBottom: 10
@@ -218,7 +220,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: 0,
     right: 0,
-    backgroundColor: "#85360B",
+    backgroundColor: palette.primary,
     borderRadius: hp("4%"),
     padding: hp("1%"),
   },
@@ -229,7 +231,7 @@ const styles = StyleSheet.create({
   inputWrapper: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#fff",
+    backgroundColor: palette.surface,
     borderRadius: hp("3%"),
     paddingHorizontal: wp("4%"),
     marginBottom: hp("2%"),

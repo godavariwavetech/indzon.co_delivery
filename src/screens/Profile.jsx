@@ -1,3 +1,5 @@
+import palette from '../theme/colors';
+import {useCallback} from 'react';
 import React, { useState, useEffect, useContext } from "react";
 import {
   View,
@@ -31,11 +33,7 @@ const ProfileScreen = () => {
   const [logoutVisible, setLogoutVisible] = useState(false);
   const { user ,logout,login} = useContext(AuthContext);
 
-  useEffect(() => {
-    fetchProfileData();
-  }, []);
-
-  const fetchProfileData = async () => {
+  const fetchProfileData = useCallback(async () => {
     try {
       setLoader(true)
       const response = await ApiService.getProfileData(user);
@@ -45,7 +43,7 @@ const ProfileScreen = () => {
         
         const deliveryBoy = response.data.data[0];
         console.log(deliveryBoy)
-        login(deliveryBoy);
+
         setProfile({
           name: deliveryBoy.delivery_boy_name,
           phone: deliveryBoy.delivery_boy_mobile_number,
@@ -60,7 +58,9 @@ const ProfileScreen = () => {
     } finally {
       setLoader(false)
     }
-  };
+  }, [user]);
+
+  useEffect(() => { fetchProfileData(); }, [fetchProfileData]);
 
   const handleEdit = () => {
     navigation.navigate("EditProfile", { profile,fetchProfileData });
@@ -73,13 +73,13 @@ const ProfileScreen = () => {
   const confirmLogout = () => {
     setLogoutVisible(false);
     logout()
-    navigation.navigate("Login");
+
   };
 
   if(loader){
     return(
       <View style={{flex:1,justifyContent:'center',alignItems:'center'}}>
-        <ActivityIndicator size={'large'} color={'#85360B'} />
+        <ActivityIndicator size={'large'} color={palette.primary} />
       </View>
     )
   }
@@ -174,7 +174,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingVertical: verticalScale(15),
     paddingLeft: wp(5),
-    backgroundColor: "#85360B",
+    backgroundColor: palette.primary,
     marginBottom: hp(1),
     width: "100%",
   },
@@ -198,7 +198,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: 0,
     right: 0,
-    backgroundColor: "#85360B",
+    backgroundColor: palette.primary,
     width: scale(30),
     height: scale(30),
     borderRadius: scale(15),
@@ -212,23 +212,23 @@ const styles = StyleSheet.create({
     paddingVertical: moderateScale(10),
     paddingHorizontal: scale(10),
     borderWidth: 1,
-    borderColor: "#ccc",
+    borderColor: palette.disabled,
     borderRadius: moderateScale(5),
     marginBottom: verticalScale(10),
     color: "#000",
   },
   button: {
     width: "100%",
-    backgroundColor: "#85360B",
+    backgroundColor: palette.primary,
     paddingVertical: moderateScale(10),
     borderRadius: moderateScale(5),
     marginTop: verticalScale(10),
   },
   logoutButton: {
-    backgroundColor: "#d32f2f",
+    backgroundColor: palette.danger,
   },
   buttonText: {
-    color: "#fff",
+    color: palette.surface,
     fontSize: moderateScale(16),
     textAlign: "center",
   },
@@ -240,7 +240,7 @@ const styles = StyleSheet.create({
   },
   modalContent: {
     width: "80%",
-    backgroundColor: "#fff",
+    backgroundColor: palette.surface,
     padding: moderateScale(20),
     borderRadius: moderateScale(10),
     alignItems: "center",
@@ -263,15 +263,15 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: moderateScale(10),
     alignItems: "center",
-    backgroundColor: "#85360B",
+    backgroundColor: palette.primary,
     marginHorizontal: scale(5),
     borderRadius: moderateScale(5),
   },
   cancelButton: {
-    backgroundColor: "#d32f2f",
+    backgroundColor: palette.danger,
   },
   modalButtonText: {
-    color: "#fff",
+    color: palette.surface,
     fontSize: moderateScale(16),
   },
 });

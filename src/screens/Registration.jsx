@@ -1,3 +1,4 @@
+import palette from '../theme/colors';
 import React, { useState, useEffect, useCallback, useContext } from 'react';
 import {
   View,
@@ -63,20 +64,6 @@ const Registration = () => {
 
   const navigation = useNavigation();
 
-  const uploadToken = async () => {
-    console.log(">>>>>>>>>>>>>>>>>VCALLIN")
-    const token = await getTokenValue();
-    // console.log("TOKEN>>>>>>>>>>>>>>>>>",token,ApiService)
-    const value = await ApiService.uploadFcmToken(token, user?.id, user?.delivery_boy_location_id);
-    setDeliveryBoyLocationId(user?.delivery_boy_location_id)
-
-    console.log("value", value)
-  }
-  useEffect(() => {
-    uploadToken();
-    fetchLocations();
-  }, []);
-
   const fetchLocations = useCallback(async () => {
     try {
       // setLoading(true);
@@ -91,7 +78,9 @@ const Registration = () => {
     } catch (error) {
       Alert.alert("Error", error.message || "Something went wrong.");
     }
-  }, [user]);
+  }, []);
+
+  useEffect(() => { fetchLocations(); }, [fetchLocations]);
 
   const validateForm = () => {
     const newErrors = {};
@@ -245,7 +234,7 @@ const Registration = () => {
     deliveryBoyRegistration(formSubmissionData);
   };
 
-  const deliveryBoyRegistration = useCallback(async (formSubmissionData) => {
+  const deliveryBoyRegistration = async (formSubmissionData) => {
     try {
       setLoader(true)
       const resp = await ApiService.registration(formSubmissionData);
@@ -262,7 +251,7 @@ const Registration = () => {
     } finally {
       setLoader(false)
     }
-  })
+  };
 
   // Handle location selection
   const handleChange = (field, value) => {
@@ -305,17 +294,17 @@ const Registration = () => {
         {item?.location_name}
       </Text>
       {formData.location === item && (
-        <Icon name="check" size={24} color="#007AFF" />
+        <Icon name="check" size={24} color={palette.primary} />
       )}
     </TouchableOpacity>
   );
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="light-content" backgroundColor="#85360B" />
+      <StatusBar barStyle="light-content" backgroundColor={palette.primary} />
       <View style={styles.header}>
         <TouchableOpacity style={styles.backButton} onPress={() => { navigation.goBack() }}>
-          <Icon name="arrow-back" size={24} color="#fff" />
+          <Icon name="arrow-back" size={24} color={palette.surface} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Registration</Text>
         <View style={styles.backButton} />
@@ -326,13 +315,13 @@ const Registration = () => {
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Name</Text>
             <View style={styles.inputWrapper}>
-              <Icon name="person" size={24} color="#666" style={styles.inputIcon} />
+              <Icon name="person" size={24} color={palette.textSecondary} style={styles.inputIcon} />
               <TextInput
                 style={styles.input}
                 onChangeText={(value) => handleChange('name', value)}
                 value={formData.name}
                 placeholder="Enter your name"
-                placeholderTextColor="#999"
+                placeholderTextColor={palette.textMuted}
               />
             </View>
             {errors.name && <Text style={styles.errorText}>{errors.name}</Text>}
@@ -342,13 +331,13 @@ const Registration = () => {
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Phone Number</Text>
             <View style={styles.inputWrapper}>
-              <Icon name="phone" size={24} color="#666" style={styles.inputIcon} />
+              <Icon name="phone" size={24} color={palette.textSecondary} style={styles.inputIcon} />
               <TextInput
                 style={styles.input}
                 onChangeText={(value) => handleChange('phoneNumber', value)}
                 value={formData.phoneNumber}
                 placeholder="Enter your phone number"
-                placeholderTextColor="#999"
+                placeholderTextColor={palette.textMuted}
                 keyboardType="phone-pad"
                 maxLength={10}
               />
@@ -360,13 +349,13 @@ const Registration = () => {
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Password</Text>
             <View style={styles.inputWrapper}>
-              <Icon name="lock" size={24} color="#666" style={styles.inputIcon} />
+              <Icon name="lock" size={24} color={palette.textSecondary} style={styles.inputIcon} />
               <TextInput
                 style={styles.input}
                 onChangeText={(value) => handleChange('password', value)}
                 value={formData.password}
                 placeholder="Enter your password"
-                placeholderTextColor="#999"
+                placeholderTextColor={palette.textMuted}
                 secureTextEntry={!showPassword}
               />
               <TouchableOpacity
@@ -376,7 +365,7 @@ const Registration = () => {
                 <Icon
                   name={showPassword ? 'visibility' : 'visibility-off'}
                   size={24}
-                  color="#666"
+                  color={palette.textSecondary}
                 />
               </TouchableOpacity>
             </View>
@@ -387,13 +376,13 @@ const Registration = () => {
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Address</Text>
             <View style={[styles.inputWrapper, styles.multilineWrapper]}>
-              <Icon name="home" size={24} color="#666" style={[styles.inputIcon, styles.multilineIcon]} />
+              <Icon name="home" size={24} color={palette.textSecondary} style={[styles.inputIcon, styles.multilineIcon]} />
               <TextInput
                 style={[styles.input, styles.multilineInput]}
                 onChangeText={(value) => handleChange('address', value)}
                 value={formData.address}
                 placeholder="Enter your address"
-                placeholderTextColor="#999"
+                placeholderTextColor={palette.textMuted}
                 multiline
               />
             </View>
@@ -408,7 +397,7 @@ const Registration = () => {
               onPress={() => setShowLocationModal(true)}
             >
               <View style={[styles.inputWrapper, { borderWidth: 0 }]}>
-                <Icon name="location-on" size={24} color="#666" style={styles.inputIcon} />
+                <Icon name="location-on" size={24} color={palette.textSecondary} style={styles.inputIcon} />
                 <Text style={[
                   styles.locationButtonText,
                   !formData.location && styles.placeholderText
@@ -416,14 +405,14 @@ const Registration = () => {
                   {formData.location || 'Select Location'}
                 </Text>
               </View>
-              <Icon name="arrow-drop-down" size={24} color="#666" />
+              <Icon name="arrow-drop-down" size={24} color={palette.textSecondary} />
             </TouchableOpacity>
             {errors.location && <Text style={styles.errorText}>{errors.location}</Text>}
           </View>
 
           {/* Bank Details Section */}
           <View style={styles.sectionHeader}>
-            <Icon name="account-balance" size={24} color="#333" />
+            <Icon name="account-balance" size={24} color={palette.text} />
             <Text style={styles.sectionTitle}>Bank Details</Text>
           </View>
 
@@ -431,13 +420,13 @@ const Registration = () => {
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Account Number</Text>
             <View style={styles.inputWrapper}>
-              <Icon name="credit-card" size={24} color="#666" style={styles.inputIcon} />
+              <Icon name="credit-card" size={24} color={palette.textSecondary} style={styles.inputIcon} />
               <TextInput
                 style={styles.input}
                 onChangeText={(value) => handleChange('bankAccountNumber', value)}
                 value={formData.bankAccountNumber}
                 placeholder="Enter bank account number"
-                placeholderTextColor="#999"
+                placeholderTextColor={palette.textMuted}
                 keyboardType="numeric"
               />
             </View>
@@ -448,13 +437,13 @@ const Registration = () => {
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Account Holder Name</Text>
             <View style={styles.inputWrapper}>
-              <Icon name="person" size={24} color="#666" style={styles.inputIcon} />
+              <Icon name="person" size={24} color={palette.textSecondary} style={styles.inputIcon} />
               <TextInput
                 style={styles.input}
                 onChangeText={(value) => handleChange('bankHolderName', value)}
                 value={formData.bankHolderName}
                 placeholder="Enter account holder name"
-                placeholderTextColor="#999"
+                placeholderTextColor={palette.textMuted}
               />
             </View>
             {errors.bankHolderName && <Text style={styles.errorText}>{errors.bankHolderName}</Text>}
@@ -464,13 +453,13 @@ const Registration = () => {
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Bank Name & Branch</Text>
             <View style={[styles.inputWrapper, styles.multilineWrapper]}>
-              <Icon name="account-balance" size={24} color="#666" style={[styles.inputIcon, styles.multilineIcon]} />
+              <Icon name="account-balance" size={24} color={palette.textSecondary} style={[styles.inputIcon, styles.multilineIcon]} />
               <TextInput
                 style={[styles.input, styles.multilineInput]}
                 onChangeText={(value) => handleChange('bankDetails', value)}
                 value={formData.bankDetails}
                 placeholder="Enter bank name and branch details"
-                placeholderTextColor="#999"
+                placeholderTextColor={palette.textMuted}
                 multiline
               />
             </View>
@@ -481,13 +470,13 @@ const Registration = () => {
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Aadhar Number</Text>
             <View style={styles.inputWrapper}>
-              <Icon name="badge" size={24} color="#666" style={styles.inputIcon} />
+              <Icon name="badge" size={24} color={palette.textSecondary} style={styles.inputIcon} />
               <TextInput
                 style={styles.input}
                 onChangeText={(value) => handleChange('aadharNumber', value)}
                 value={formData.aadharNumber}
                 placeholder="Enter Aadhar number"
-                placeholderTextColor="#999"
+                placeholderTextColor={palette.textMuted}
                 keyboardType="numeric"
                 maxLength={12}
               />
@@ -501,7 +490,7 @@ const Registration = () => {
                 <Image source={{ uri: images.aadharImage.uri }} style={styles.previewImage} />
               ) : (
                 <View style={styles.placeholderContent}>
-                  <Icon name="upload-file" size={40} color="#666" />
+                  <Icon name="upload-file" size={40} color={palette.textSecondary} />
                   <Text style={styles.placeholderText}>Upload Aadhar Image</Text>
                 </View>
               )}
@@ -513,13 +502,13 @@ const Registration = () => {
           <View style={styles.inputContainer}>
             <Text style={styles.label}>PAN Number</Text>
             <View style={styles.inputWrapper}>
-              <Icon name="credit-card" size={24} color="#666" style={styles.inputIcon} />
+              <Icon name="credit-card" size={24} color={palette.textSecondary} style={styles.inputIcon} />
               <TextInput
                 style={styles.input}
                 onChangeText={(value) => handleChange('panNumber', value.toUpperCase())}
                 value={formData.panNumber}
                 placeholder="Enter PAN number"
-                placeholderTextColor="#999"
+                placeholderTextColor={palette.textMuted}
                 autoCapitalize="characters"
                 maxLength={10}
               />
@@ -533,7 +522,7 @@ const Registration = () => {
                 <Image source={{ uri: images.panImage.uri }} style={styles.previewImage} />
               ) : (
                 <View style={styles.placeholderContent}>
-                  <Icon name="upload-file" size={40} color="#666" />
+                  <Icon name="upload-file" size={40} color={palette.textSecondary} />
                   <Text style={styles.placeholderText}>Upload PAN Image</Text>
                 </View>
               )}
@@ -552,7 +541,7 @@ const Registration = () => {
                 <Image source={{ uri: images.bankBookImage.uri }} style={styles.previewImage} />
               ) : (
                 <View style={styles.placeholderContent}>
-                  <Icon name="upload-file" size={40} color="#666" />
+                  <Icon name="upload-file" size={40} color={palette.textSecondary} />
                   <Text style={styles.placeholderText}>Upload Bank Book Image</Text>
                 </View>
               )}
@@ -564,13 +553,13 @@ const Registration = () => {
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Driving Licence Number</Text>
             <View style={styles.inputWrapper}>
-              <Icon name="directions-car" size={24} color="#666" style={styles.inputIcon} />
+              <Icon name="directions-car" size={24} color={palette.textSecondary} style={styles.inputIcon} />
               <TextInput
                 style={styles.input}
                 onChangeText={(value) => handleChange('drivingLicenceNumber', value)}
                 value={formData.drivingLicenceNumber}
                 placeholder="Enter driving licence number"
-                placeholderTextColor="#999"
+                placeholderTextColor={palette.textMuted}
               />
             </View>
             {errors.drivingLicenceNumber && (
@@ -584,7 +573,7 @@ const Registration = () => {
                 <Image source={{ uri: images.licenceImage.uri }} style={styles.previewImage} />
               ) : (
                 <View style={styles.placeholderContent}>
-                  <Icon name="upload-file" size={40} color="#666" />
+                  <Icon name="upload-file" size={40} color={palette.textSecondary} />
                   <Text style={styles.placeholderText}>Upload Licence Image</Text>
                 </View>
               )}
@@ -596,13 +585,13 @@ const Registration = () => {
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Bike Number</Text>
             <View style={styles.inputWrapper}>
-              <Icon name="two-wheeler" size={24} color="#666" style={styles.inputIcon} />
+              <Icon name="two-wheeler" size={24} color={palette.textSecondary} style={styles.inputIcon} />
               <TextInput
                 style={styles.input}
                 onChangeText={(value) => handleChange('bikeNumber', value)}
                 value={formData.bikeNumber}
                 placeholder="Enter bike number"
-                placeholderTextColor="#999"
+                placeholderTextColor={palette.textMuted}
               />
             </View>
             {errors.bikeNumber && <Text style={[styles.errorText, { marginBottom: 12 }]}>{errors.bikeNumber}</Text>}
@@ -614,7 +603,7 @@ const Registration = () => {
                 <Image source={{ uri: images.bikeImage.uri }} style={styles.previewImage} />
               ) : (
                 <View style={styles.placeholderContent}>
-                  <Icon name="upload-file" size={40} color="#666" />
+                  <Icon name="upload-file" size={40} color={palette.textSecondary} />
                   <Text style={styles.placeholderText}>Upload Bike Image</Text>
                 </View>
               )}
@@ -634,7 +623,7 @@ const Registration = () => {
               ) : (
                 <View style={styles.placeholderContent}>
                   {/* <Icon name="camera-alt" size={40} color="#666" /> */}
-                  <Icon name="upload-file" size={40} color="#666" />
+                  <Icon name="upload-file" size={40} color={palette.textSecondary} />
                   <Text style={styles.placeholderText}>Upload Image</Text>
                 </View>
               )}
@@ -644,9 +633,9 @@ const Registration = () => {
 
           <TouchableOpacity onPress={handleSubmit}  style={styles.submitButton}>
             {
-                loader ? <ActivityIndicator size='small' color={'#fff'} /> : (
+                loader ? <ActivityIndicator size='small' color={palette.surface} /> : (
               <View style={{flexDirection:'row',alignItems:'center',justifyContent:'center'}}>
-                <Icon name="check-circle" size={24} color="#fff" style={styles.buttonIcon} />
+                <Icon name="check-circle" size={24} color={palette.surface} style={styles.buttonIcon} />
                 <Text style={styles.submitButtonText}>Submit</Text>
               </View>
                 )
@@ -670,7 +659,7 @@ const Registration = () => {
                 onPress={() => setShowLocationModal(false)}
                 style={styles.closeButton}
               >
-                <Icon name="close" size={24} color="#666" />
+                <Icon name="close" size={24} color={palette.textSecondary} />
               </TouchableOpacity>
             </View>
             <FlatList
@@ -689,7 +678,7 @@ const Registration = () => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: palette.surface,
   },
   header: {
     flexDirection: 'row',
@@ -697,9 +686,9 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 16,
     paddingVertical: 12,
-    backgroundColor: '#85360B',
+    backgroundColor: palette.primary,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    borderBottomColor: palette.border,
     elevation: 2,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
@@ -715,11 +704,11 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 20,
     fontWeight: '600',
-    color: '#fff',
+    color: palette.surface,
   },
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: palette.background,
   },
   formContainer: {
     padding: 20,
@@ -731,12 +720,12 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     paddingBottom: 8,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    borderBottomColor: palette.border,
   },
   sectionTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#333',
+    color: palette.text,
     marginLeft: 8,
   },
   inputContainer: {
@@ -746,15 +735,15 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginBottom: 8,
     fontWeight: '600',
-    color: '#333',
+    color: palette.text,
   },
   inputWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#fff',
+    backgroundColor: palette.surface,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: palette.border,
     paddingHorizontal: 12,
   },
   multilineWrapper: {
@@ -770,7 +759,7 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 16,
     paddingVertical: 12,
-    color: '#333',
+    color: palette.text,
   },
   multilineInput: {
     height: 100,
@@ -781,26 +770,26 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: '#fff',
+    backgroundColor: palette.surface,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: palette.border,
     paddingHorizontal: 12,
     paddingVertical: 12,
   },
   locationButtonText: {
     fontSize: 16,
-    color: '#333',
+    color: palette.text,
   },
   placeholderText: {
-    color: '#999',
+    color: palette.textMuted,
   },
   imagePlaceholder: {
     height: 200,
-    backgroundColor: '#f8f8f8',
+    backgroundColor: palette.background,
     borderRadius: 12,
     borderWidth: 2,
-    borderColor: '#ddd',
+    borderColor: palette.border,
     borderStyle: 'dashed',
     marginTop: 10,
     overflow: 'hidden',
@@ -818,7 +807,7 @@ const styles = StyleSheet.create({
   },
   submitButton: {
     // backgroundColor: '#007AFF',
-    backgroundColor: '#85360B',
+    backgroundColor: palette.primary,
     padding: 12,
     borderRadius: 12,
     marginTop: 20,
@@ -827,12 +816,12 @@ const styles = StyleSheet.create({
     // justifyContent: 'center',
   },
   submitButtonText: {
-    color: '#fff',
+    color: palette.surface,
     fontSize: 18,
     fontWeight: 'bold',
   },
   errorText: {
-    color: '#ff3b30',
+    color: palette.danger,
     fontSize: 12,
     marginTop: 5,
   },
@@ -842,7 +831,7 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   modalContent: {
-    backgroundColor: '#fff',
+    backgroundColor: palette.surface,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     paddingBottom: Platform.OS === 'ios' ? 40 : 20,
@@ -854,12 +843,12 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     padding: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
+    borderBottomColor: palette.border,
   },
   modalTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#333',
+    color: palette.text,
   },
   closeButton: {
     padding: 4,
@@ -874,14 +863,14 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    borderBottomColor: palette.border,
   },
   locationItemText: {
     fontSize: 16,
-    color: '#333',
+    color: palette.text,
   },
   selectedLocationText: {
-    color: '#007AFF',
+    color: palette.primary,
     fontWeight: '600',
   },
   buttonIcon: {

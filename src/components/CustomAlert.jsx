@@ -1,3 +1,4 @@
+import palette from '../theme/colors';
 // components/CustomAlert.js
 import React from 'react';
 import { Modal, View, Text, TouchableOpacity, StyleSheet } from 'react-native';
@@ -26,25 +27,25 @@ const styles = StyleSheet.create({
   },
   alertBox: {
     width: '80%',
-    backgroundColor: '#fff',
+    backgroundColor: palette.surface,
     padding: 20,
     borderRadius: 10,
     elevation: 5,
   },
   message: {
     fontSize: 16,
-    color: '#333',
+    color: palette.text,
     marginBottom: 20,
     textAlign: 'center',
   },
   button: {
-    backgroundColor: '#85360B',
+    backgroundColor: palette.primary,
     paddingVertical: 10,
     borderRadius: 8,
     alignItems: 'center',
   },
   buttonText: {
-    color: '#fff',
+    color: palette.surface,
     fontWeight: 'bold',
   },
 });

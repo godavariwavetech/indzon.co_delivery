@@ -1,4 +1,6 @@
-import React from "react";
+import palette from '../theme/colors';
+import React, {useContext} from "react";
+import {AuthContext} from '../context/AuthContext';
 import {
   View,
   Text,
@@ -17,6 +19,7 @@ import { useNavigation, DrawerActions } from "@react-navigation/native";
 
 const CustomDrawer = (props) => {
   const navigation = useNavigation();
+  const {user, logout} = useContext(AuthContext);
   
   return (
     <View style={styles.container}>
@@ -34,7 +37,7 @@ const CustomDrawer = (props) => {
           source={require("../assets/person.png")} // Replace with actual profile image
           style={styles.profileImage}
         />
-        <Text style={styles.profileName}>Prashanth</Text>
+        <Text style={styles.profileName}>{user?.delivery_boy_name}</Text>
       </View>
 
       {/* Drawer Items */}
@@ -43,7 +46,7 @@ const CustomDrawer = (props) => {
       </DrawerContentScrollView>
 
       {/* Logout Button */}
-      <TouchableOpacity style={styles.logoutButton} onPress={() => navigation.replace("LoginScreen")}>
+      <TouchableOpacity style={styles.logoutButton} onPress={logout}>
         <Text style={styles.logoutText}>Logout</Text>
       </TouchableOpacity>
     </View>
@@ -55,14 +58,14 @@ export default CustomDrawer;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f97316", // Orange background
+    backgroundColor: palette.primary,
     paddingHorizontal: wp("5%"), // Added padding for better alignment
   },
   profileSection: {
     alignItems: "center", // Centers content horizontally
     paddingVertical: hp("5%"),
     borderBottomWidth: 1,
-    borderBottomColor: "#fff",
+    borderBottomColor: palette.surface,
   },
   profileImage: {
     width: wp("18%"),
@@ -73,7 +76,7 @@ const styles = StyleSheet.create({
   profileName: {
     fontSize: wp("5%"),
     fontWeight: "bold",
-    color: "#fff",
+    color: palette.surface,
     textAlign: "center", // Ensures text is centered properly
     marginTop: hp("1%"), // Adds space between image and text
   },
@@ -81,18 +84,18 @@ const styles = StyleSheet.create({
     paddingVertical: hp("2%"),
     alignItems: "center",
     borderTopWidth: 1,
-    borderTopColor: "#fff",
+    borderTopColor: palette.surface,
   },
   logoutText: {
     fontSize: wp("4.5%"),
-    color: "#fff",
+    color: palette.surface,
     fontWeight: "bold",
   },
   backButton: {
     position: 'absolute',
     top: hp('2%'),
     left: wp('4%'),
-    backgroundColor: "#FF6F00", // Slightly transparent white
+    backgroundColor: 'rgba(255,255,255,0.15)',
     padding: moderateScale(5),
     borderRadius: moderateScale(10),
   },

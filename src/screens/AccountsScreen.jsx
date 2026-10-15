@@ -1,3 +1,6 @@
+import palette from '../theme/colors';
+import {useCallback as useDemoCallback} from 'react';
+import {subscribeDemo} from '../services/demoService';
 import React, {useContext, useEffect} from 'react';
 import {
   View,
@@ -29,7 +32,7 @@ const AccountsScreen = () => {
   const onlineEarnings = paymentSummary?.delivery_charges;
   const finalPaymentAmount = onlineEarnings - cashInHand;
 
-  const fetchReportingHistory = async () => {
+  const fetchReportingHistory = useDemoCallback(async () => {
     try {
       setLoading(true);
       setError(false);
@@ -44,18 +47,20 @@ const AccountsScreen = () => {
       setLoading(false);
       setRefreshing(false);
     }
-  };
+  }, [user?.id]);
 
   useEffect(() => {
     fetchReportingHistory();
-  }, [user]);
+  }, [fetchReportingHistory]);
 
   React.useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
       fetchReportingHistory();
     });
     return unsubscribe;
-  }, [navigation]);
+  }, [navigation, fetchReportingHistory]);
+
+  React.useEffect(() => subscribeDemo(fetchReportingHistory), [fetchReportingHistory]);
 
   const handleRefresh = () => {
     setRefreshing(true);
@@ -70,14 +75,14 @@ const AccountsScreen = () => {
     <View style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.openDrawer()}>
-          <Ionicons name="menu" size={30} color="#fff" />
+          <Ionicons name="menu" size={30} color={palette.surface} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Accounts</Text>
       </View>
 
       {loading ? (
         <View style={styles.loaderContainer}>
-          <ActivityIndicator size="large" color="#4CAF50" />
+          <ActivityIndicator size="large" color={palette.primary} />
         </View>
       ) : error ? (
         <View style={styles.errorContainer}>
@@ -95,7 +100,7 @@ const AccountsScreen = () => {
           <MaterialCommunityIcons
             name="file-document-outline"
             size={60}
-            color="#ddd"
+            color={palette.border}
           />
           <Text style={styles.emptyText}>
             No transactions found for this period
@@ -107,8 +112,8 @@ const AccountsScreen = () => {
             <RefreshControl
               refreshing={refreshing}
               onRefresh={handleRefresh}
-              colors={['#4CAF50']}
-              tintColor="#4CAF50"
+              colors={[palette.primary]}
+              tintColor={palette.primary}
             />
           }>
             
@@ -116,7 +121,7 @@ const AccountsScreen = () => {
             <MaterialCommunityIcons
               name="calendar-month"
               size={24}
-              color="#4CAF50"
+              color={palette.primary}
             />
             <View style={styles.dateRangeContent}>
               <Text style={styles.dateRangeLabel}>Reporting Period</Text>
@@ -153,7 +158,7 @@ const AccountsScreen = () => {
                 <Text style={styles.methodText}>Cash in Hand</Text>
                 <View style={styles.paymentDetails}>
                   <Text style={styles.detailText}>-</Text>
-                  <Text style={[styles.detailText, { color: '#85360B' }]}>
+                  <Text style={[styles.detailText, { color: '#3236FF' }]}>
                     ₹{paymentSummary.cod_amount}
                   </Text>
                 </View>
@@ -162,7 +167,7 @@ const AccountsScreen = () => {
 
               {/* COD Payments */}
               <View style={styles.paymentRow}>
-                <MaterialCommunityIcons name="cash" size={20} color="#4CAF50" />
+                <MaterialCommunityIcons name="cash" size={20} color={palette.success} />
                 <Text style={styles.methodText}>COD Orders</Text>
                 <View style={styles.paymentDetails}>
                   <Text style={styles.detailText}>
@@ -180,7 +185,7 @@ const AccountsScreen = () => {
                 <MaterialCommunityIcons
                   name="credit-card"
                   size={20}
-                  color="#2196F3"
+                  color={palette.primary}
                 />
                 <Text style={styles.methodText}>Online Orders</Text>
                 <View style={styles.paymentDetails}>
@@ -199,7 +204,7 @@ const AccountsScreen = () => {
                 <MaterialCommunityIcons
                   name="truck-delivery"
                   size={20}
-                  color="#FF9800"
+                  color={palette.warning}
                 />
                 <Text style={styles.methodText}>Amount Per Order</Text>
                 <View style={styles.paymentDetails}>
@@ -233,7 +238,7 @@ const AccountsScreen = () => {
                   <Text style={[styles.detailText, { color: '#999', textDecorationLine: 'line-through' }]}>
                     ₹{paymentSummary.delivery_charges}
                   </Text>
-                  <Text style={[styles.detailText, { color: '#85360B', marginLeft: 8 }]}>
+                  <Text style={[styles.detailText, { color: '#3236FF', marginLeft: 8 }]}>
                     ₹{(paymentSummary.delivery_charges - (0)).toFixed(2)}
                   </Text>
                 </View>
@@ -244,14 +249,14 @@ const AccountsScreen = () => {
                 <MaterialCommunityIcons
                   name="wallet"
                   size={20}
-                  color="#4CAF50"
+                  color={palette.success}
                 />
                 <Text style={styles.methodText}>Cash in Hand</Text>
                 <View style={styles.paymentDetails}>
                   <Text style={styles.detailText}>
-                    {paymentSummary.cod_count} orders
+                    {paymentSummary.cash_in_hand_count} orders
                   </Text>
-                  <Text style={[styles.detailText, {color: '#85360B'}]}>
+                  <Text style={[styles.detailText, {color: palette.primary}]}>
                     ₹{paymentSummary.cod_amount?.toFixed(0)}
                   </Text>
                 </View>
@@ -267,7 +272,7 @@ const AccountsScreen = () => {
                     style={[
                       styles.detailText,
                       styles.finalAmount,
-                      {color: paymentSummary?.total_deliveryboy_amount >= 0 ? '#85360B' : '#dc3545'},
+                      {color: paymentSummary?.total_deliveryboy_amount >= 0 ? palette.primary : palette.danger},
                     ]}>
                     ₹ {paymentSummary?.total_deliveryboy_amount >= 0 ? '+' : '-'}
                     {paymentSummary?.total_deliveryboy_amount}
@@ -280,14 +285,6 @@ const AccountsScreen = () => {
 
         </ScrollView>
       )}
-      {paymentSummary && Object.keys(paymentSummary).length > 0 && (
-        <View style={styles.settlementSection}>
-          <Text style={styles.otpLabel}>Verification OTP</Text>
-          <Text style={styles.otpDisplay}>
-            {paymentSummary?.deliveryboy_payment_otp || '1234'}
-          </Text>
-        </View>
-      )}
     </View>
   );
 };
@@ -299,14 +296,14 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#85360B',
+    backgroundColor: palette.primary,
     padding: 15,
     marginBottom: 10,
   },
   headerTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#fff',
+    color: palette.surface,
     marginLeft: 15,
   },
   timeContainer: {
@@ -318,7 +315,7 @@ const styles = StyleSheet.create({
   timeInput: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#fff',
+    backgroundColor: palette.surface,
     padding: 12,
     borderRadius: 8,
     width: '48%',
@@ -326,7 +323,7 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   timeText: {
-    color: '#333',
+    color: palette.text,
     fontSize: 14,
   },
   highlightContainer: {
@@ -343,12 +340,12 @@ const styles = StyleSheet.create({
   },
   highlightValue: {
     fontSize: 28,
-    color: '#fff',
+    color: palette.surface,
     fontWeight: 'bold',
     marginVertical: 8,
   },
   highlightLabel: {
-    color: '#fff',
+    color: palette.surface,
     fontSize: 18,
     marginBottom: 4,
     fontWeight: '700',
@@ -379,12 +376,12 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   statLabel: {
-    color: '#666',
+    color: palette.textSecondary,
     textAlign: 'center',
     fontSize: 12,
   },
   feeNote: {
-    color: '#999',
+    color: palette.textMuted,
     fontSize: 10,
     marginTop: 4,
   },
@@ -392,7 +389,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '600',
     marginBottom: 15,
-    color: '#333',
+    color: palette.text,
     paddingHorizontal: 15,
   },
   statsHorizontalContainer: {
@@ -428,25 +425,25 @@ const styles = StyleSheet.create({
   listMainText: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#333',
+    color: palette.text,
   },
   listSubText: {
     fontSize: 14,
     fontWeight: '500',
-    color: '#444',
+    color: palette.textSecondary,
   },
   listLabel: {
-    color: '#666',
+    color: palette.textSecondary,
     fontSize: 12,
   },
   listValue: {
-    color: '#333',
+    color: palette.text,
     fontSize: 14,
     fontWeight: '500',
     marginTop: 4,
   },
   totalItem: {
-    backgroundColor: '#4CAF50',
+    backgroundColor: palette.primary,
     paddingVertical: 20,
   },
   totalText: {
@@ -464,7 +461,7 @@ const styles = StyleSheet.create({
   },
   cardShadow: {
   borderRadius: 12,
-  backgroundColor: '#fff', // required for Android shadow
+  backgroundColor: palette.surface, // required for Android shadow
   marginHorizontal: 15,
   marginBottom: 15,
   // iOS shadow
@@ -487,12 +484,12 @@ const styles = StyleSheet.create({
   summaryHeader: {
     padding: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    borderBottomColor: palette.border,
   },
   summaryTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#333',
+    color: palette.text,
     marginBottom: 12,
   },
   summaryTotal: {
@@ -504,12 +501,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   totalLabel: {
-    color: '#666',
+    color: palette.textSecondary,
     fontSize: 17,
     fontWeight: '700',
   },
   totalValue: {
-    color: '#333',
+    color: palette.text,
     fontSize: 15,
     fontWeight: '500',
   },
@@ -524,7 +521,7 @@ const styles = StyleSheet.create({
   },
   methodText: {
     flex: 1,
-    color: '#444',
+    color: palette.textSecondary,
     fontSize: 14,
   },
   paymentDetails: {
@@ -533,18 +530,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   detailText: {
-    color: '#333',
+    color: palette.text,
     fontSize: 14,
     minWidth: 80,
     textAlign: 'right',
   },
   divider: {
     height: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: palette.background,
     marginVertical: 8,
   },
   finalPayment: {
-    backgroundColor: '#f8f9fa',
+    backgroundColor: palette.background,
     borderRadius: 8,
     padding: 12,
     marginTop: 10,
@@ -553,46 +550,20 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     fontSize: 16,
   },
-  settlementSection: {
-    padding: 16,
-    borderTopWidth: 1,
-    borderTopColor: '#f0f0f0',
-    // marginTop: 20,
-  },
-  otpLabel: {
-    color: '#666',
-    fontSize: 14,
-    marginBottom: 8,
-    textAlign: 'center',
-  },
-  otpDisplay: {
-    fontSize: 28,
-    fontWeight: '700',
-    color: '#1B5E20',
-    textAlign: 'center',
-    letterSpacing: 8,
-    // marginVertical: 12,
-  },
-  otpInstruction: {
-    color: '#666',
-    fontSize: 12,
-    textAlign: 'center',
-    marginBottom: 16,
-  },
   settleButton: {
-    backgroundColor: '#85360B',
+    backgroundColor: palette.primary,
     borderRadius: 8,
     padding: 16,
     alignItems: 'center',
     marginTop: 10,
   },
   settleButtonText: {
-    color: '#fff',
+    color: palette.surface,
     fontSize: 16,
     fontWeight: '600',
   },
   errorText: {
-    color: '#dc3545',
+    color: palette.danger,
     fontSize: 12,
     textAlign: 'center',
     marginTop: 4,
@@ -600,7 +571,7 @@ const styles = StyleSheet.create({
   dateRangeContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#E8F5E9',
+    backgroundColor: palette.primarySoft,
     padding: 16,
     borderRadius: 8,
     marginHorizontal: 15,
@@ -612,14 +583,14 @@ const styles = StyleSheet.create({
     marginLeft: 12,
   },
   dateRangeLabel: {
-    color: '#2E7D32',
+    color: palette.primary,
     fontSize: 12,
     fontWeight: '500',
     textTransform: 'uppercase',
     letterSpacing: 0.5,
   },
   dateRangeText: {
-    color: '#1B5E20',
+    color: palette.primary,
     fontSize: 15,
     fontWeight: '600',
     marginTop: 4,
@@ -636,7 +607,7 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   retryButton: {
-    backgroundColor: '#4CAF50',
+    backgroundColor: palette.primary,
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 5,
@@ -652,7 +623,7 @@ const styles = StyleSheet.create({
     padding: 40,
   },
   emptyText: {
-    color: '#999',
+    color: palette.textMuted,
     fontSize: 16,
     textAlign: 'center',
     marginTop: 20,

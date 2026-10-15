@@ -1,3 +1,4 @@
+import palette from '../theme/colors';
 import React, { useState, useRef } from "react";
 import {
   View,
@@ -90,7 +91,7 @@ const OTPVerificationScreen = ({ route }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F8F9FC",
+    backgroundColor: palette.background,
     paddingHorizontal: width * 0.08,
     justifyContent: "center", // Ensures content is vertically centered
   },
@@ -117,13 +118,13 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontSize: width * 0.04,
-    color: "#93969F",
+    color: palette.textMuted,
     marginBottom: height * 0.03,
     textAlign: "center",
   },
   phoneNumber: {
     fontWeight: "bold",
-    color: "#93969F",
+    color: palette.textMuted,
   },
   otpContainer: {
     flexDirection: "row",
@@ -133,25 +134,25 @@ const styles = StyleSheet.create({
   },
   otpBox: {
     borderWidth: 1,
-    borderColor: "#85360B",
+    borderColor: palette.primary,
     borderRadius: 10,
     width: width * 0.14,
     height: height * 0.07,
     fontSize: width * 0.05,
     color: "#000",
     textAlign: "center",
-    backgroundColor:"#fff"
+    backgroundColor:palette.surface
   },
   resendText: {
     fontSize: width * 0.04,
     color: "#000",
   },
   resendLink: {
-    color: "#85360B",
+    color: palette.primary,
     fontWeight: 600,
   },
   verifyButton: {
-    backgroundColor: "#85360B",
+    backgroundColor: palette.primary,
     width: "100%",
     paddingVertical: height * 0.018,
     borderRadius: 50,
@@ -161,7 +162,7 @@ const styles = StyleSheet.create({
     alignSelf: "center",
   },
   verifyText: {
-    color: "#FFF",
+    color: palette.surface,
     fontSize: width * 0.045,
     fontWeight: "bold",
   },

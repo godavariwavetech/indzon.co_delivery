@@ -1,3 +1,4 @@
+import palette from '../theme/colors';
 // screens/DeleteAccountScreen.js
 import React, { useContext,useEffect } from 'react';
 import { View, Text, Button, Alert } from 'react-native';
@@ -6,11 +7,11 @@ import ApiService from '../services/apiservice';
 
 
 const DeleteAccountScreen = ({ navigation }) => {
-    const { user } = useContext(AuthContext);
+    const { user, login } = useContext(AuthContext);
 
     useEffect(()=>{
         console.log(user?.id, 'user');
-    },[])
+    },[user?.id])
 
     const handleDelete = async () => {
         console.log('deleted');
@@ -20,10 +21,12 @@ const DeleteAccountScreen = ({ navigation }) => {
             console.log(resp, 'delete response')
             console.log(resp?.status === 200)
             if (resp?.status === 200) {
-                Alert.alert('Account deleted successfully');
-                navigation.navigate('MainApp');
+                const result = await ApiService.login();
+                await login(result.data[0]);
+                Alert.alert('Data reset successfully');
+                navigation.navigate('Home');
             } else {
-                Alert.alert("Error", response?.message || "Failed to fetch Profile.");
+                Alert.alert("Error", resp?.message || "Failed to fetch Profile.");
             }
         } catch (error) {
             Alert.alert("Error", error.message || "Something went wrong.");
@@ -34,7 +37,7 @@ const DeleteAccountScreen = ({ navigation }) => {
 
         Alert.alert(
             'Confirm Delete',
-            'Are you sure you want to delete your account? This action cannot be undone.',
+            'Are you sure you want to reset your profile and deliveries? This resets the local data.',
             [
                 { text: 'Cancel', style: 'cancel', },
                 {
@@ -44,7 +47,7 @@ const DeleteAccountScreen = ({ navigation }) => {
                         handleDelete()
                         // TODO: Add your API call here
                         // Example: await api.delete('/user/account');
-                        // Alert.alert('Account deleted successfully');
+                        // Alert.alert('Demo reset successfully');
                         // navigation.navigate('Home');
                     },
                 },
@@ -54,8 +57,8 @@ const DeleteAccountScreen = ({ navigation }) => {
 
     return (
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-            <Text style={{ marginBottom: 20, fontSize: 16 }}>Delete your account permanently</Text>
-            <Button title="Delete Account" color="red" onPress={handleDeleteAccount} />
+            <Text style={{ marginBottom: 20, fontSize: 16 }}>Reset your profile and deliveries</Text>
+            <Button title="Reset Data" color={palette.primary} onPress={handleDeleteAccount} />
         </View>
     );
 };

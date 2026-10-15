@@ -1,4 +1,4 @@
-package com.amaraadelivery
+package com.indzon.delivery
 
 import com.facebook.react.ReactActivity
 import com.facebook.react.ReactActivityDelegate

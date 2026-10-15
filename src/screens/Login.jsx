@@ -1,3 +1,4 @@
+import palette from '../theme/colors';
 import React, { useState, useContext } from 'react';
 import {
   View,
@@ -33,7 +34,7 @@ const LoginScreen = ({ navigation }) => {
   const [alertVisible, setAlertVisible] = useState(false);
   const [alertMessage, setAlertMessage] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [isAgreed, setIsAgreed] = useState(false);
+  const [isAgreed, setIsAgreed] = useState(true);
   
   // This state now only controls visibility
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -88,7 +89,7 @@ const LoginScreen = ({ navigation }) => {
         if (response.status === 200 && response.data.length > 0) {
           console.log('Login Success:', response);
           login(response.data[0]);
-          navigation.replace('MainApp');
+
         } else if (response.status === 300) {
           setAlertMessage('Please wait until verification is complete from Admin');
           setAlertVisible(true);
@@ -121,9 +122,9 @@ const LoginScreen = ({ navigation }) => {
           bounces={false}
         >
           <View style={styles.container}>
-      <StatusBar backgroundColor="#fff" barStyle="dark-content" />
+      <StatusBar backgroundColor={palette.surface} barStyle="dark-content" />
             <Image
-        source={require('../assets/amaraa.png')}
+        source={require('../assets/indzon-logo.png')}
               style={styles.logo}
               resizeMode="contain"
             />
@@ -181,7 +182,7 @@ const LoginScreen = ({ navigation }) => {
           <Icon
             name={isAgreed ? 'checkbox-marked' : 'checkbox-blank-outline'}
             size={24}
-            color={isAgreed ? '#85360B' : 'gray'}
+            color={isAgreed ? palette.primary : 'gray'}
           />
         </TouchableOpacity>
         <Text style={styles.agreementText}>
@@ -198,14 +199,14 @@ const LoginScreen = ({ navigation }) => {
               disabled={!isButtonEnabled || loading}
             >
               {loading ? (
-                <ActivityIndicator size="small" color="#fff" />
+                <ActivityIndicator size="small" color={palette.surface} />
               ) : (
-                <Text style={styles.loginText}>Log In</Text>
+                <Text style={styles.loginText}>Enter</Text>
               )}
             </TouchableOpacity>
 
       <TouchableOpacity onPress={() => navigation.navigate('Registration')}>
-        <Text style={{ color: '#85360B', marginTop: verticalScale(20) }}>
+        <Text style={{ color: palette.primary, marginTop: verticalScale(20) }}>
           Don't have an account? Register
         </Text>
       </TouchableOpacity>
@@ -232,14 +233,14 @@ const LoginScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: palette.surface,
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: moderateScale(20),
   },
   logo: {
     width: 200,
-    height: 150,
+    height: 200,
     marginBottom: verticalScale(20),
     borderRadius: 10,
   },
@@ -249,42 +250,42 @@ const styles = StyleSheet.create({
   input: {
     height: verticalScale(45),
     borderWidth: 1,
-    borderColor: '#e0e0e0',
+    borderColor: palette.border,
     borderRadius: moderateScale(10),
     padding: moderateScale(10),
-    backgroundColor: '#f5f5f5',
+    backgroundColor: palette.background,
     marginBottom: verticalScale(10),
     fontSize: scale(14),
     color: '#000',
   },
   input2: {
-    backgroundColor: '#f5f5f5',
+    backgroundColor: palette.background,
     fontSize: scale(14),
     color: '#000',
   },
   inputError: {
-    borderColor: 'red',
-    backgroundColor: '#fff0f0',
+    borderColor: palette.danger,
+    backgroundColor: palette.dangerSoft,
   },
   errorText: {
-    color: 'red',
+    color: palette.danger,
     fontSize: scale(12),
     marginBottom: verticalScale(5),
     paddingLeft: moderateScale(5),
   },
   loginButton: {
     width: '100%',
-    backgroundColor: '#85360B',
+    backgroundColor: palette.primary,
     paddingVertical: verticalScale(12),
     borderRadius: moderateScale(10),
     alignItems: 'center',
     marginTop: verticalScale(15),
   },
   disabledButton: {
-    backgroundColor: '#ccc',
+    backgroundColor: palette.disabled,
   },
   loginText: {
-    color: '#fff',
+    color: palette.surface,
     fontSize: scale(16),
     fontWeight: 'bold',
   },
@@ -292,9 +293,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#e0e0e0',
+    borderColor: palette.border,
     borderRadius: moderateScale(10),
-    backgroundColor: '#f5f5f5',
+    backgroundColor: palette.background,
     marginBottom: verticalScale(10),
     height: verticalScale(45),
   },
@@ -304,7 +305,7 @@ const styles = StyleSheet.create({
     marginBottom: verticalScale(15),
   },
   forgotPasswordText: {
-    color: '#85360B',
+    color: palette.primary,
     fontSize: scale(12),
   },
   agreementContainer: {
@@ -319,10 +320,10 @@ const styles = StyleSheet.create({
   },
   agreementText: {
     fontSize: scale(13),
-    color: '#333',
+    color: palette.text,
   },
   linkText: {
-    color: '#85360B',
+    color: palette.primary,
     fontWeight: 'bold',
     textDecorationLine: 'underline',
   },

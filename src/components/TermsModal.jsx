@@ -1,3 +1,4 @@
+import palette from '../theme/colors';
 import React from 'react';
 import {
   Modal,
@@ -92,7 +93,7 @@ const styles = StyleSheet.create({
     fontSize: scale(20),
     fontWeight: 'bold',
     marginBottom: verticalScale(15),
-    color: '#333',
+    color: palette.text,
   },
   modalScrollView: {
     width: '100%',
@@ -103,7 +104,7 @@ const styles = StyleSheet.create({
   },
   updateText: {
     fontSize: scale(12),
-    color: '#6c757d',
+    color: palette.textSecondary,
     marginBottom: verticalScale(15),
     fontStyle: 'italic',
     textAlign: 'center',
@@ -111,21 +112,21 @@ const styles = StyleSheet.create({
   heading: {
     fontSize: scale(16),
     fontWeight: '700',
-    color: '#343a40',
+    color: palette.text,
     marginTop: verticalScale(10),
     marginBottom: verticalScale(5),
   },
   paragraph: {
     fontSize: scale(14),
     lineHeight: verticalScale(20),
-    color: '#495057',
+    color: palette.textSecondary,
     textAlign: 'justify',
   },
   bold: {
     fontWeight: 'bold',
   },
   modalCloseButton: {
-    backgroundColor: '#85360B',
+    backgroundColor: palette.primary,
     borderRadius: moderateScale(10),
     paddingVertical: verticalScale(12),
     paddingHorizontal: moderateScale(30),

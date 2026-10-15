@@ -1,3 +1,4 @@
 <resources>
-    <string name="app_name">Amaraa Delivery</string>
+    <!-- <string name="app_name">Amaraa Delivery</string> -->
+    <string name="app_name">Indzon Delivery</string>
 </resources>

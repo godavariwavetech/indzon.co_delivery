@@ -1,3 +1,6 @@
+import palette from '../theme/colors';
+import {useCallback as useDemoCallback} from 'react';
+import {subscribeDemo} from '../services/demoService';
 import React, { useContext, useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, ActivityIndicator, FlatList, RefreshControl } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
@@ -19,7 +22,7 @@ const ReportsScreen = () => {
   const [showStartPicker, setShowStartPicker] = useState(false);
   const [showEndPicker, setShowEndPicker] = useState(false);
 
-  const fetchReports = async () => {
+  const fetchReports = useDemoCallback(async () => {
     try {
       setLoading(true);
       setError(false);
@@ -35,11 +38,13 @@ const ReportsScreen = () => {
       setLoading(false);
       setRefreshing(false);
     }
-  };
+  }, [startDate, endDate, user?.id]);
 
   useEffect(() => {
     fetchReports();
-  }, []);
+  }, [fetchReports]);
+
+  useEffect(() => subscribeDemo(fetchReports), [fetchReports]);
 
   const handleRefresh = () => {
     setRefreshing(true);
@@ -72,7 +77,7 @@ const ReportsScreen = () => {
   const renderReportItem = ({ item }) => (
     <View style={styles.reportCard}>
       <View style={styles.reportHeader}>
-        <MaterialCommunityIcons name="calendar-range" size={20} color="#85360B" />
+        <MaterialCommunityIcons name="calendar-range" size={20} color={palette.primary} />
         <View style={{ flex: 1 }}>
           <Text style={styles.paymentDate}>
             {formatDate(item.payment_dates.split(' - ')[0])} - {formatDate(item.payment_dates.split(' - ')[1])}
@@ -82,7 +87,7 @@ const ReportsScreen = () => {
           </Text>
         </View>
         {/* <View style={[styles.statusIndicator, 
-          { backgroundColor: item.d_in === 0 ? '#FFA726' : '#85360B' }]}>
+          { backgroundColor: item.d_in === 0 ? '#FFA726' : '#3236FF' }]}>
           <Text style={styles.statusText}>
             {item.d_in === 0 ? 'Pending' : 'Completed'}
           </Text>
@@ -144,8 +149,8 @@ const ReportsScreen = () => {
             <Text style={[styles.detailValue, { fontSize: 16 }]}>₹{item.total_amount}</Text>
           </View> */}
           <View style={styles.detailRow}>
-            <Text style={[styles.detailLabel, { color: '#85360B' }]}>Net Payment</Text>
-            <Text style={[styles.detailValue, { color: '#85360B', fontWeight: '700' }]}>
+            <Text style={[styles.detailLabel, { color: palette.primary }]}>Net Payment</Text>
+            <Text style={[styles.detailValue, { color: palette.primary, fontWeight: '700' }]}>
               ₹{item.total_payment_amount}
             </Text>
           </View>
@@ -174,7 +179,7 @@ const ReportsScreen = () => {
     <View style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.openDrawer()}>
-          <Ionicons name="menu" size={30} color="#fff" />
+          <Ionicons name="menu" size={30} color={palette.surface} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Reports</Text>
       </View>
@@ -188,7 +193,7 @@ const ReportsScreen = () => {
             <Text style={styles.dateText}>
               {formatDate(startDate)}
             </Text>
-            <MaterialCommunityIcons name="calendar" size={20} color="#666" />
+            <MaterialCommunityIcons name="calendar" size={20} color={palette.textSecondary} />
           </TouchableOpacity>
           
           <Text style={styles.dateSeparator}>to</Text>
@@ -200,7 +205,7 @@ const ReportsScreen = () => {
             <Text style={styles.dateText}>
               {formatDate(endDate)}
             </Text>
-            <MaterialCommunityIcons name="calendar" size={20} color="#666" />
+            <MaterialCommunityIcons name="calendar" size={20} color={palette.textSecondary} />
           </TouchableOpacity>
         </View>
         
@@ -232,7 +237,7 @@ const ReportsScreen = () => {
 
       {loading ? (
         <View style={styles.loaderContainer}>
-          <ActivityIndicator size="large" color="#85360B" />
+          <ActivityIndicator size="large" color={palette.primary} />
         </View>
       ) : error ? (
         <View style={styles.errorContainer}>
@@ -254,13 +259,13 @@ const ReportsScreen = () => {
             <RefreshControl
               refreshing={refreshing}
               onRefresh={handleRefresh}
-              colors={['#85360B']}
-              tintColor="#85360B"
+              colors={[palette.primary]}
+              tintColor={palette.primary}
             />
           }
           ListEmptyComponent={
             <View style={styles.emptyState}>
-              <MaterialCommunityIcons name="file-document-outline" size={60} color="#ddd" />
+              <MaterialCommunityIcons name="file-document-outline" size={60} color={palette.border} />
               <Text style={styles.emptyText}>No reports available</Text>
             </View>
           }
@@ -273,7 +278,7 @@ const ReportsScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: palette.background,
   },
   reportCard: {
     backgroundColor: 'white',
@@ -295,7 +300,7 @@ const styles = StyleSheet.create({
   paymentDate: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#333',
+    color: palette.text,
     marginLeft: 12,
   },
   statusIndicator: {
@@ -317,11 +322,11 @@ const styles = StyleSheet.create({
     marginVertical: 4,
   },
   detailLabel: {
-    color: '#666',
+    color: palette.textSecondary,
     fontSize: 14,
   },
   detailValue: {
-    color: '#333',
+    color: palette.text,
     fontSize: 14,
     fontWeight: '500',
   },
@@ -332,10 +337,10 @@ const styles = StyleSheet.create({
     marginTop: 12,
     paddingTop: 12,
     borderTopWidth: 1,
-    borderTopColor: '#f0f0f0',
+    borderTopColor: palette.border,
   },
   viewButtonText: {
-    color: '#85360B',
+    color: palette.primary,
     fontSize: 14,
     fontWeight: '500',
     marginRight: 4,
@@ -352,13 +357,13 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   errorText: {
-    color: '#dc3545',
+    color: palette.danger,
     fontSize: 16,
     textAlign: 'center',
     marginBottom: 20,
   },
   retryButton: {
-    backgroundColor: '#85360B',
+    backgroundColor: palette.primary,
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 5,
@@ -374,7 +379,7 @@ const styles = StyleSheet.create({
     padding: 40,
   },
   emptyText: {
-    color: '#999',
+    color: palette.textMuted,
     fontSize: 16,
     textAlign: 'center',
     marginTop: 20,
@@ -385,14 +390,14 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#85360B',
+    backgroundColor: palette.primary,
     padding: 15,
     marginBottom: 10,
   },
   headerTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#fff',
+    color: palette.surface,
     marginLeft: 15,
   },
   filterContainer: {
@@ -418,20 +423,20 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: palette.border,
     borderRadius: 8,
     padding: 12,
   },
   dateText: {
-    color: '#333',
+    color: palette.text,
     fontSize: 14,
   },
   dateSeparator: {
-    color: '#666',
+    color: palette.textSecondary,
     fontSize: 14,
   },
   filterButton: {
-    backgroundColor: '#85360B',
+    backgroundColor: palette.primary,
     borderRadius: 8,
     padding: 12,
     marginTop: 12,
@@ -444,17 +449,17 @@ const styles = StyleSheet.create({
   },
   subText: {
     fontSize: 12,
-    color: '#666',
+    color: palette.textSecondary,
     marginTop: 4,
   },
   section: {
     marginVertical: 12,
     paddingBottom: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    borderBottomColor: palette.border,
   },
   sectionTitle: {
-    color: '#85360B',
+    color: palette.primary,
     fontSize: 14,
     fontWeight: '600',
     marginBottom: 8,
@@ -465,11 +470,11 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   orderId: {
-    backgroundColor: '#85360B',
+    backgroundColor: palette.primary,
     borderRadius: 4,
     paddingHorizontal: 8,
     paddingVertical: 4,
-    color: '#fff',
+    color: palette.surface,
     fontSize: 12,
   },
 });

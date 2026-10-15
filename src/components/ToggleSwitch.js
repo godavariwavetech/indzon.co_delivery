@@ -1,3 +1,4 @@
+import palette from '../theme/colors';
 import React, { useContext, useRef, useEffect } from 'react';
 import { View, Animated, TouchableWithoutFeedback, StyleSheet } from 'react-native';
 import ApiService from '../services/apiservice';
@@ -28,7 +29,7 @@ const ToggleSwitch = ({ toggle, setToggle }) => {
     };
     
     updateServerStatus();
-  }, [toggle, user?.id]);
+  }, [toggle, user?.id, translateX]);
 
   const handleToggle = () => {
     console.log('ToggleSwitch - Manual toggle pressed, current:', toggle);
@@ -39,8 +40,8 @@ const ToggleSwitch = ({ toggle, setToggle }) => {
     <View>
       <TouchableWithoutFeedback onPress={handleToggle}>
         <View style={styles.container}>
-          <View style={[styles.toggleContainer, { backgroundColor: toggle === 1 ? '#FFF' : '#DDD' }]}>
-            <Animated.View style={[styles.swipeCircle, { backgroundColor: toggle === 1 ? '#4CAF50' : '#E53935', transform: [{ translateX }] }]} />
+          <View style={[styles.toggleContainer, { backgroundColor: toggle === 1 ? palette.surface : palette.border }]}>
+            <Animated.View style={[styles.swipeCircle, { backgroundColor: toggle === 1 ? palette.success : palette.danger, transform: [{ translateX }] }]} />
           </View>
         </View>
       </TouchableWithoutFeedback>

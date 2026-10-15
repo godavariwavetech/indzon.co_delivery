@@ -1,3 +1,4 @@
+import palette from '../theme/colors';
 import React from "react";
 import { View, Text, Image, StyleSheet } from "react-native";
 import Animated, { FadeIn } from "react-native-reanimated";
@@ -7,7 +8,7 @@ const SplashScreen = () => {
     <View style={styles.container}>
       {/* Logo Animation */}
       <Animated.View entering={FadeIn.duration(1500)}>
-        <Image source={require("../assets/amaraa.png")} style={styles.logo} />
+        <Image source={require("../assets/indzon-logo.png")} style={styles.logo} />
       </Animated.View>
 
       {/* App Name */}
@@ -28,23 +29,23 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#fff", 
+    backgroundColor: palette.surface, 
   },
   logo: {
     width: 250,
-    height: 300,
+    height: 250,
     resizeMode: "contain",
     borderRadius: 10,
   },
   appName: {
     fontSize: 24,
-    color: "#fff",
+    color: palette.text,
     fontWeight: "bold",
     marginTop: 20,
   },
   loadingText: {
     fontSize: 16,
-    color: "#fff",
+    color: palette.textSecondary,
     marginTop: 10,
     opacity: 0.8,
   },

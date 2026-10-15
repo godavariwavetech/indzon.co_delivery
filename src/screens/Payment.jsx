@@ -1,4 +1,7 @@
-import React, { useState } from 'react';
+import palette from '../theme/colors';
+import {useCallback as useDemoCallback} from 'react';
+import {subscribeDemo} from '../services/demoService';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -14,6 +17,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { useNavigation } from '@react-navigation/native';
 import ApiService from '../services/apiservice';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
 const { width } = Dimensions.get('window');
 
@@ -57,12 +61,13 @@ const DatePickerField = ({ label, value, onChange }) => {
 
 const PaymentsScreen = () => {
   const navigation = useNavigation();
+  const insets = useSafeAreaInsets();
   const [fromDate, setFromDate] = useState(new Date().toLocaleDateString("en-GB").split("/").join("-"));
   const [toDate, setToDate] = useState(new Date().toLocaleDateString("en-GB").split("/").join("-"));  
   const [payments, setPayments] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  const fetchPayments = async () => {
+  const fetchPayments = useDemoCallback(async () => {
     if (!fromDate || !toDate) {
       alert('Please select both From Date and To Date.');
       return;
@@ -76,7 +81,10 @@ const PaymentsScreen = () => {
       setPayments([]);
     }
     setLoading(false);
-  };
+  }, [fromDate, toDate]);
+
+  useEffect(() => { fetchPayments(); }, [fetchPayments]);
+  useEffect(() => subscribeDemo(fetchPayments), [fetchPayments]);
 
   return (
     <View style={styles.container}>
@@ -97,11 +105,13 @@ const PaymentsScreen = () => {
         </TouchableOpacity>
 
         {loading ? (
-          <ActivityIndicator size="large" color="#85360B" style={{ marginTop: 20 }} />
+          <ActivityIndicator size="large" color={palette.primary} style={{ marginTop: 20 }} />
         ) : payments.length === 0 ? (
           <Text style={styles.noPaymentsText}>No Payments Found</Text>
         ) : (
           <FlatList
+            style={styles.list}
+            contentContainerStyle={[styles.listContent, {paddingBottom: Math.max(insets.bottom, 16)}]}
             data={payments}
             keyExtractor={(item, index) => index.toString()}
             renderItem={({ item }) => (
@@ -127,7 +137,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: '#85360B',
+    backgroundColor: palette.primary,
     padding: 15,
   },
   headerText: {
@@ -136,7 +146,16 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   content: {
-    padding: 20,
+    flex: 1,
+    minHeight: 0,
+    paddingHorizontal: 20,
+    paddingTop: 20,
+  },
+  list: {
+    flex: 1,
+  },
+  listContent: {
+    paddingTop: 4,
   },
   fieldContainer: {
     marginBottom: 15,
@@ -150,7 +169,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: '#f0f0f0',
+    backgroundColor: palette.border,
     paddingHorizontal: 15,
     paddingVertical: 2,
     borderRadius: 5,
@@ -161,7 +180,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   searchButton: {
-    backgroundColor: '#85360B',
+    backgroundColor: palette.primary,
     paddingVertical: 12,
     alignItems: 'center',
     borderRadius: 5,
@@ -179,7 +198,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   paymentItem: {
-    backgroundColor: '#e0ffe0',
+    backgroundColor: palette.successSoft,
     padding: 15,
     borderRadius: 5,
     marginBottom: 10,

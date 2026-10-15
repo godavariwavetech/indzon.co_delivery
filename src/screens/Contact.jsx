@@ -1,3 +1,4 @@
+import palette from '../theme/colors';
 import React, { useEffect, useState } from 'react';
 import {
   View,
@@ -46,39 +47,16 @@ const ContactUsScreen = () => {
     fetchContactInfo(); // Fetch data on component mount
   }, []);
 
-  const handleWhatsAppPress = () => {
-    if (!contactInfo?.contact_number) return Alert.alert('Error', 'No WhatsApp number available.');
-    const whatsappUrl = `https://wa.me/91${contactInfo.contact_number}`;
-    Linking.openURL(whatsappUrl).catch(() => {
-      Alert.alert('Error', 'Could not open WhatsApp.');
-    });
-  };
-
-  const handleCallPress = () => {
-    if (!contactInfo?.contact_number) return Alert.alert('Error', 'No phone number available.');
-    Linking.openURL(`tel:${contactInfo.contact_number}`).catch(() => {
-      Alert.alert('Error', 'Could not open dialer.');
-    });
-  };
-
-  const handleEmailPress = () => {
-    if (!contactInfo?.mail_id) return Alert.alert('Error', 'No email available.');
-    // const emailUrl = `mailto:${contactInfo.mail_id}`;
-    const email = contactInfo.mail_id;
-    const subject = "Contact Us";
-    const body = "Hello, I need assistance!";
-    const url = `mailto:${email}?subject=${subject}&body=${body}`;
-    Linking.openURL(url).catch(() => {
-      Alert.alert('Error', 'Could not open email client.');
-    });
-  };
+  const handleWhatsAppPress = () => Alert.alert('Support', `Simulated WhatsApp chat with ${contactInfo.contact_number}`);
+  const handleCallPress = () => Alert.alert('Support', `Simulated call to ${contactInfo.contact_number}`);
+  const handleEmailPress = () => Alert.alert('Support', `Simulated email to ${contactInfo.mail_id}`);
 
   return (
     <>
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.openDrawer()}>
-          <Ionicons name="menu" size={30} color="#fff" />
+          <Ionicons name="menu" size={30} color={palette.surface} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Contact Us</Text>
       </View>
@@ -104,7 +82,7 @@ const ContactUsScreen = () => {
             {/* WhatsApp Button */}
             <TouchableOpacity style={styles.option} onPress={handleWhatsAppPress}>
               <View style={{ flexDirection: 'row', gap: 10 }}>
-                <Ionicons name="logo-whatsapp" size={24} color="#85360B" />
+                <Ionicons name="logo-whatsapp" size={24} color={palette.primary} />
                 <Text style={styles.optionText}>Message on WhatsApp</Text>
               </View>
             </TouchableOpacity>
@@ -112,7 +90,7 @@ const ContactUsScreen = () => {
             {/* Call Button */}
             <TouchableOpacity style={styles.option} onPress={handleCallPress}>
               <View style={{ flexDirection: 'row', gap: 10 }}>
-                <Ionicons name="call-outline" size={24} color="#85360B" />
+                <Ionicons name="call-outline" size={24} color={palette.primary} />
                 <Text style={styles.optionText}>Call Us</Text>
               </View>
             </TouchableOpacity>
@@ -120,7 +98,7 @@ const ContactUsScreen = () => {
             {/* Email Button */}
             <TouchableOpacity style={styles.option} onPress={handleEmailPress}>
               <View style={{ flexDirection: 'row', gap: 10 }}>
-                <Ionicons name="mail-outline" size={24} color="#85360B" />
+                <Ionicons name="mail-outline" size={24} color={palette.primary} />
                 <Text style={styles.optionText}>Send an Email</Text>
               </View>
             </TouchableOpacity>
@@ -134,19 +112,19 @@ const ContactUsScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: palette.surface,
     padding: 20,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#85360B',
+    backgroundColor: palette.primary,
     padding: 15,
   },
   headerTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#fff',
+    color: palette.surface,
     marginLeft: 15,
   },
   option: {
@@ -164,7 +142,7 @@ const styles = StyleSheet.create({
   },
   errorText: {
     fontSize: 16,
-    color: 'red',
+    color: palette.danger,
     fontWeight: 'bold',
   },
 });

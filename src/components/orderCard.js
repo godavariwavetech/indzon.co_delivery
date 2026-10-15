@@ -1,3 +1,4 @@
+import palette from '../theme/colors';
 import React, { useState }  from 'react';
 import { View, Text, StyleSheet, TouchableOpacity ,Modal } from 'react-native';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
@@ -39,7 +40,7 @@ const OrderCard = ({ order, onPress, onAccept }) => {
           <Text style={styles.grandTotal}>₹{order.grand_total}</Text>
         </View>
         <View style={styles.timeContainer}>
-          <Ionicons name="time-outline" size={16} color="#555" />
+          <Ionicons name="time-outline" size={16} color={palette.textSecondary} />
           <Text style={styles.timeText}>{order?.order_date} {order?.order_time}</Text>
         </View>
 
@@ -48,11 +49,11 @@ const OrderCard = ({ order, onPress, onAccept }) => {
         {/* Shop and Delivery Address */}
         <View style={styles.addressSection}>
           <View style={styles.infoRow}>
-            <FontAwesome5 name="store-alt" size={15} color="#E53935" />
+            <FontAwesome5 name="store-alt" size={15} color={palette.primary} />
             <Text style={styles.infoText} numberOfLines={1}>{order.shop_name}</Text>
           </View>
           <View style={styles.infoRow}>
-            <FontAwesome5 name="location-arrow" size={15} color="#85360B" />
+            <FontAwesome5 name="location-arrow" size={15} color={palette.primary} />
             <Text style={styles.infoText} numberOfLines={2}>
               {order.delivery_address}
             </Text>
@@ -115,18 +116,18 @@ const OrderCard = ({ order, onPress, onAccept }) => {
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: '#fff',
+    backgroundColor: palette.surface,
     borderRadius: 12,
     padding: 12, // Reduced padding
     marginVertical: 6, // Reduced vertical margin
     marginHorizontal: 4, // Added horizontal margin for shadow
     shadowColor: '#000',
-    shadowOpacity: 0.12,
+    shadowOpacity: 0.06,
     shadowOffset: { width: 0, height: 2 },
     shadowRadius: 4, // Reduced shadow radius
-    elevation: 4,
-    borderWidth: 0.5,
-  borderColor: 'rgba(0,0,0,0.05)',
+    elevation: 2,
+    borderWidth: 1,
+    borderColor: palette.border,
   },
   orderHeader: {
     flexDirection: 'row',
@@ -137,12 +138,12 @@ const styles = StyleSheet.create({
   orderId: {
     fontSize: 15,
     fontWeight: 'bold',
-    color: '#333',
+    color: palette.text,
   },
   grandTotal: {
     fontSize: 15,
     fontWeight: 'bold',
-    color: '#333',
+    color: palette.text,
   },
   timeContainer: {
     flexDirection: 'row',
@@ -150,7 +151,7 @@ const styles = StyleSheet.create({
   },
   timeText: {
     fontSize: 13,
-    color: '#555',
+    color: palette.textSecondary,
     marginLeft: 5,
   },
   addressSection: {
@@ -165,7 +166,7 @@ const styles = StyleSheet.create({
     fontSize: 13,
     marginLeft: 10,
     flex: 1,
-    color: '#333',
+    color: palette.text,
   },
   earningContainer: {
     flexDirection: 'row',
@@ -176,24 +177,24 @@ const styles = StyleSheet.create({
   },
   earningLabel: {
     fontSize: 14,
-    color: '#333',
+    color: palette.text,
     fontWeight: '500',
   },
   earningValue: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#27ae60',
+    color: palette.success,
   },
   // --- STYLES FOR ACCEPT BUTTON ---
   acceptButton: {
-    backgroundColor: '#27ae60', // Green color for accept
+    backgroundColor: palette.success, // Green color for accept
     borderRadius: 8,
     paddingVertical: 12,
     alignItems: 'center',
     marginTop: 12,
   },
   acceptButtonText: {
-    color: '#fff',
+    color: palette.surface,
     fontSize: 15,
     fontWeight: 'bold',
   },
@@ -205,7 +206,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   modalBox: {
-    backgroundColor: '#fff',
+    backgroundColor: palette.surface,
     width: '80%',
     borderRadius: 12,
     padding: 25,
@@ -215,13 +216,13 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#333',
+    color: palette.text,
     marginBottom: 10,
     textAlign: 'center',
   },
   modalMessage: {
     fontSize: 14,
-    color: '#555',
+    color: palette.textSecondary,
     marginBottom: 25,
     textAlign: 'center',
     lineHeight: 20,
@@ -241,17 +242,17 @@ const styles = StyleSheet.create({
 
   },
   cancelBtn: {
-    backgroundColor: '#eee',
+    backgroundColor: palette.border,
   },
   confirmBtn: {
-    backgroundColor: '#27ae60',
+    backgroundColor: palette.success,
   },
   cancelText: {
-    color: '#333',
+    color: palette.text,
     fontWeight: 'bold',
   },
   confirmText: {
-    color: '#fff',
+    color: palette.surface,
     fontWeight: 'bold',
   },
 });

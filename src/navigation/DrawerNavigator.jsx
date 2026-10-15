@@ -1,3 +1,4 @@
+import palette from '../theme/colors';
 import React from 'react';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import { createStackNavigator } from '@react-navigation/stack';
@@ -7,6 +8,8 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 // --- Import all your screens ---
 import OrdersScreen from '../screens/Orders';
 import CompletedOrders from '../screens/CompletedOrders';
+import Payment from '../screens/Payment';
+import DemoPreferences from '../screens/DemoPreferences';
 import Contact from '../screens/Contact';
 import ProfileScreen from '../screens/Profile';
 import EditProfileScreen from '../screens/EditProfile';
@@ -33,17 +36,17 @@ const ProfileStack = () => {
 
 const DrawerNavigator = () => {
   return (
-    <SafeAreaView style={{flex: 1, backgroundColor: '#85360B'}}>
+    <SafeAreaView style={{flex: 1, backgroundColor: palette.primary}}>
       <Drawer.Navigator
         initialRouteName="Home"
         screenOptions={{
           drawerStyle: {
-            backgroundColor: '#FFFFFF', // White background
+            backgroundColor: palette.surface, // White background
           },
           headerShown: false,
-          drawerActiveBackgroundColor: '#85360B', // Light Lime #85360B
-          drawerActiveTintColor: '#FFFFFF', // White text/icons for active item
-          drawerInactiveTintColor: '#333333', // Dark gray for inactive text/icons
+          drawerActiveBackgroundColor: palette.primarySoft,
+          drawerActiveTintColor: palette.primary,
+          drawerInactiveTintColor: palette.text, // Dark gray for inactive text/icons
           drawerLabelStyle: {fontSize: 16, fontWeight: 'bold'},
         }}>
         {/* Orders Screen */}
@@ -93,6 +96,9 @@ const DrawerNavigator = () => {
           }}
         />
 
+        <Drawer.Screen name="Earnings" component={Payment} options={{drawerIcon: ({color}) => <MaterialIcons name="payments" size={22} color={color} />}} />
+        <Drawer.Screen name="Notifications" component={DemoPreferences} options={{drawerIcon: ({color}) => <MaterialIcons name="notifications" size={22} color={color} />}} />
+        <Drawer.Screen name="Settings" component={DemoPreferences} options={{drawerIcon: ({color}) => <MaterialIcons name="settings" size={22} color={color} />}} />
         {/* Reports */}
         <Drawer.Screen
           name="Reports"

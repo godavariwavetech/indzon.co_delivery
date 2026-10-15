@@ -1,3 +1,4 @@
+import palette from '../theme/colors';
 import React from 'react';
 import {
   SafeAreaView,
@@ -88,14 +89,14 @@ const TermsAndConditionsScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: palette.background,
   },
   header: {
     flexDirection: "row",
     alignItems: "center",
     paddingVertical: verticalScale(15),
     paddingLeft: wp(5),
-    backgroundColor: "#85360B",
+    backgroundColor: palette.primary,
     marginBottom: hp(1),
     width: "100%",
   },
@@ -108,11 +109,11 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 26,
     fontWeight: 'bold',
-    color: '#212529',
+    color: palette.text,
   },
   subtitle: {
     fontSize: 16,
-    color: '#6c757d',
+    color: palette.textSecondary,
   },
   scrollView: {
     flex: 1,
@@ -122,21 +123,21 @@ const styles = StyleSheet.create({
   },
   updateText: {
     fontSize: 12,
-    color: '#6c757d',
+    color: palette.textSecondary,
     marginBottom: 20,
     fontStyle: 'italic',
   },
   heading: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#343a40',
+    color: palette.text,
     marginTop: 15,
     marginBottom: 8,
   },
   paragraph: {
     fontSize: 15,
     lineHeight: 22,
-    color: '#495057',
+    color: palette.textSecondary,
     textAlign: 'justify',
   },
   bold: {
@@ -145,18 +146,18 @@ const styles = StyleSheet.create({
   footer: {
     padding: 20,
     borderTopWidth: 1,
-    borderTopColor: '#dee2e6',
-    backgroundColor: '#ffffff',
+    borderTopColor: palette.border,
+    backgroundColor: palette.surface,
   },
   acceptButton: {
-    backgroundColor: '#007bff',
+    backgroundColor: palette.primary,
     paddingVertical: 15,
     borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
   },
   acceptButtonText: {
-    color: '#ffffff',
+    color: palette.surface,
     fontSize: 16,
     fontWeight: 'bold',
   },

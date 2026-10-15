@@ -1,4 +1,6 @@
-import React, {useState, useEffect, useRef, useContext} from 'react';
+import palette from '../theme/colors';
+import {useCallback as useDemoCallback} from 'react';
+import React, {useState, useEffect, useContext} from 'react';
 import {
   View,
   Text,
@@ -7,12 +9,7 @@ import {
   TouchableOpacity,
   Image,
   Modal,
-  TextInput,
   Dimensions,
-  Alert,
-  Linking,
-  TouchableWithoutFeedback,
-  Keyboard,
   StatusBar,
   Platform,
 } from 'react-native';
@@ -32,14 +29,14 @@ const {width} = Dimensions.get('window');
 // --- UI Theme & Colors ---
 const theme = {
   colors: {
-    primary: '#85360B', // Gold
-    background: '#F8F9FA',
-    card: '#FFFFFF',
-    textPrimary: '#2C3E50', // Dark Slate Blue
-    textSecondary: '#7F8C8D', // Greyish Blue
-    border: '#EAEAEA',
-    success: '#2ECC71',
-    lightBlue: '#3498DB',
+    primary: palette.primary,
+    background: palette.background,
+    card: palette.surface,
+    textPrimary: palette.text, // Dark Slate Blue
+    textSecondary: palette.textSecondary, // Greyish Blue
+    border: palette.border,
+    success: palette.success,
+    lightBlue: palette.primary,
   },
   spacing: {
     m: moderateScale(16),
@@ -70,21 +67,32 @@ const OrderTrackingScreen = ({route}) => {
 
   const [orderStatus, setOrderStatus] = useState(orderDetails.order_status);
   const [orderItems, setOrderItems] = useState(null);
-  const [showOtpModal, setShowOtpModal] = useState(false);
-  const [otp, setOtp] = useState(['1', '2', '3', '4']);
-  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [dialog, setDialog] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
+  const showMessage = useDemoCallback((title, message) => {
+    setDialog({title, message});
+  }, []);
 
-  const otpInputs = useRef([]);
+  const confirmDialog = async () => {
+    const action = dialog?.onConfirm;
+    setDialog(null);
+    if (!action) return;
+    setSubmitting(true);
+    try {
+      await action();
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
 
   const insets = useSafeAreaInsets()
 
-  useEffect(() => {
-    fetchOrders();
-  }, []);
+
 
   console.log(orderDetails, '>>>>>>>>>>>>>>>>>>>VVVV');
 
-  const fetchOrders = async () => {
+  const fetchOrders = useDemoCallback(async () => {
     try {
       const response = await ApiService.getOrderDetails(
         orderDetails.id || orderDetails.order_id,
@@ -92,50 +100,34 @@ const OrderTrackingScreen = ({route}) => {
       if (response?.status === 200) {
         setOrderItems(response.data);
       } else {
-        Alert.alert(
+        showMessage(
           'Error',
           response?.message || 'Failed to load order items.',
         );
       }
     } catch (error) {
-      Alert.alert('Error', error.message || 'Something went wrong.');
+      showMessage('Error', error.message || 'Something went wrong.');
     }
-  };
+  }, [orderDetails.id, orderDetails.order_id, showMessage]);
+
+  useEffect(() => { fetchOrders(); }, [fetchOrders]);
 
   const openGoogleMaps = (lat, lng) => {
-    const scheme = Platform.OS === 'ios' ? 'maps:' : 'geo:';
-    const url = `${scheme}0,0?q=${lat},${lng}`;
-    Linking.openURL(url);
+    showMessage('Delivery Route', `${orderDetails.shop_address} → ${orderDetails.delivery_address}`);
   };
 
   const makePhoneCall = phoneNumber => {
-    Linking.openURL(`tel:${phoneNumber}`);
+    showMessage('Contact', `Simulated call to ${phoneNumber}`);
   };
 
   // --- API Handlers ---
-  const handleOtpChange = (index, value) => {
-    if (isNaN(value)) return;
-    const newOtp = [...otp];
-    newOtp[index] = value;
-    setOtp(newOtp);
-    if (value && index < 3) otpInputs.current[index + 1].focus();
-  };
-
-  const handleOtpSubmit = () => {
-    const enteredOtp = otp.join('');
-    // OTP is now only for the customer
-    const targetOtp = orderDetails.customer_otp;
-
-    if (enteredOtp.length === 4 && enteredOtp === targetOtp) {
-      completedOrder();
-      setOtp(['', '', '', '']);
-    } else {
-      Alert.alert('Error', 'The entered OTP is incorrect.');
-    }
-  };
-
   const accepteSubmmited = () => {
-    setShowConfirmModal(true);
+    setDialog({
+      title: 'Accept this order?',
+      message: 'Once accepted, this order will be assigned to you.',
+      confirmText: 'Yes, Accept',
+      onConfirm: confirmAcceptOrder,
+    });
   };
 
   const confirmAcceptOrder = async () => {
@@ -150,15 +142,13 @@ const OrderTrackingScreen = ({route}) => {
       const response = await ApiService.acceptorders(payload);
       if (response?.status === 200) {
         setOrderStatus(8);
-        route.params.handleAccept(orderDetails.order_id);
-        Alert.alert('Success', 'Order accepted successfully.');
+        // Shared demo store already updated the home screen.
+        showMessage('Success', 'Order accepted successfully.');
       } else {
-        Alert.alert('Error', response?.message || 'Failed to accept order.');
+        showMessage('Error', response?.message || 'Failed to accept order.');
       }
     } catch (error) {
-      Alert.alert('Error', error.message || 'Something went wrong.');
-    } finally {
-      setShowConfirmModal(false);
+      showMessage('Error', error.message || 'Something went wrong.');
     }
   };
 
@@ -171,12 +161,11 @@ const OrderTrackingScreen = ({route}) => {
       const response = await ApiService.vendorReceived(payload);
       if (response?.status === 200) {
         setOrderStatus(2);
-        setShowOtpModal(false);
       } else {
-        Alert.alert('Error', response?.message || 'Failed to update status.');
+        showMessage('Error', response?.message || 'Failed to update status.');
       }
     } catch (error) {
-      Alert.alert('Error', error.message || 'Something went wrong.');
+      showMessage('Error', error.message || 'Something went wrong.');
     }
   };
 
@@ -184,37 +173,29 @@ const OrderTrackingScreen = ({route}) => {
     const payload = {
       order_id: orderDetails.order_id,
       delivery_id: user.id,
-      delivery_otp: otp.join(''),
       customer_id: orderDetails?.customer_id,
     };
     try {
       const response = await ApiService.completedorder(payload);
       if (response?.status === 200) {
         setOrderStatus(3);
-        setShowOtpModal(false);
         // Delay navigation to allow user to see completed status
         setTimeout(() => navigation.goBack(), 1000);
       } else {
-        Alert.alert('Error', response?.message || 'Failed to complete order.');
+        showMessage('Error', response?.message || 'Failed to complete order.');
       }
     } catch (error) {
-      Alert.alert('Error', error.message || 'Something went wrong.');
+      showMessage('Error', error.message || 'Something went wrong.');
     }
   };
 
-  const handleCompletePress = () => {
-    setShowOtpModal(true);
-  };
-
   const handlePickup = () => {
-    Alert.alert(
-      'Confirm Pickup',
-      'Are you sure you have picked up the order from the vendor?',
-      [
-        {text: 'Cancel', style: 'cancel'},
-        {text: 'Confirm', onPress: submitVendorReceived},
-      ],
-    );
+    setDialog({
+      title: 'Confirm Pickup',
+      message: 'Are you sure you have picked up the order from the vendor?',
+      confirmText: 'Confirm Pickup',
+      onConfirm: submitVendorReceived,
+    });
   };
 
   // --- Helper Components ---
@@ -325,6 +306,7 @@ const OrderTrackingScreen = ({route}) => {
         return (
           <TouchableOpacity
             style={[styles.actionButton, styles.acceptButton]}
+            disabled={submitting}
             onPress={accepteSubmmited}>
             <Text style={styles.actionButtonText}>Accept Order</Text>
           </TouchableOpacity>
@@ -333,6 +315,7 @@ const OrderTrackingScreen = ({route}) => {
         return (
           <TouchableOpacity
             style={[styles.actionButton, styles.vendorButton]}
+            disabled={submitting}
             onPress={handlePickup}>
             <Text style={styles.actionButtonText}>Pickup Order</Text>
           </TouchableOpacity>
@@ -341,7 +324,8 @@ const OrderTrackingScreen = ({route}) => {
         return (
           <TouchableOpacity
             style={[styles.actionButton, styles.completeButton]}
-            onPress={handleOtpSubmit}>
+            disabled={submitting}
+            onPress={completedOrder}>
             <Text style={styles.actionButtonText}>Deliver Order</Text>
           </TouchableOpacity>
         );
@@ -380,7 +364,7 @@ const OrderTrackingScreen = ({route}) => {
       />
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Icon name="arrow-back" size={24} color="#fff" />
+          <Icon name="arrow-back" size={24} color={palette.surface} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Order Details</Text>
       </View>
@@ -497,11 +481,15 @@ const OrderTrackingScreen = ({route}) => {
           </>
         )}
 
+        <InfoCard title="Pickup & Delivery Instructions" icon="information-circle-outline">
+          <Text style={styles.detailValue}>{orderDetails.pickup_instructions}</Text>
+          <Text style={styles.detailValue}>{orderDetails.delivery_instructions}</Text>
+        </InfoCard>
         {/* --- Order Items --- */}
         <InfoCard title="Order Items" icon="fast-food-outline">
           {orderItems?.orderitemdata.map((item, index) => (
             <View key={index} style={styles.itemRow}>
-              <Image source={{uri: item.item_image}} style={styles.itemImage} />
+              <Image source={require("../assets/dishimage.jpg")} style={styles.itemImage} />
               <View style={styles.itemDetails}>
                 <Text style={styles.itemName}>{item.item_name}</Text>
                 <Text style={styles.itemQty}>
@@ -515,72 +503,28 @@ const OrderTrackingScreen = ({route}) => {
 
       <View style={[styles.footer,{bottom:insets.bottom}]}>{getAction()}</View>
 
-      {/* --- OTP Modal --- */}
-      <Modal visible={showOtpModal} transparent animationType="fade">
-        <TouchableWithoutFeedback onPress={() => setShowOtpModal(false)}>
-          <View style={styles.modalContainer}>
-            <TouchableWithoutFeedback>
-              <View style={styles.modalContent}>
-                <Text style={styles.modalTitle}>Enter OTP</Text>
-                <Text style={styles.modalSubtitle}>
-                  Please enter the OTP from the customer to complete the
-                  delivery.
-                </Text>
-                <View style={styles.otpContainer}>
-                  {otp.map((digit, index) => (
-                    <TextInput
-                      key={index}
-                      style={styles.otpInput}
-                      value={digit}
-                      onChangeText={value => handleOtpChange(index, value)}
-                      maxLength={1}
-                      keyboardType="numeric"
-                      ref={ref => (otpInputs.current[index] = ref)}
-                      onKeyPress={({nativeEvent}) => {
-                        if (
-                          nativeEvent.key === 'Backspace' &&
-                          !digit &&
-                          index > 0
-                        ) {
-                          otpInputs.current[index - 1].focus();
-                        }
-                      }}
-                    />
-                  ))}
-                </View>
-                <TouchableOpacity
-                  onPress={handleOtpSubmit}
-                  style={styles.modalButton}>
-                  <Text style={styles.modalButtonText}>Submit</Text>
-                </TouchableOpacity>
-              </View>
-            </TouchableWithoutFeedback>
-          </View>
-        </TouchableWithoutFeedback>
-      </Modal>
-
       {/* --- Confirmation Modal --- */}
       <Modal
-        visible={showConfirmModal}
+        visible={dialog !== null}
         transparent
         animationType="fade"
-        onRequestClose={() => setShowConfirmModal(false)}>
+        onRequestClose={() => setDialog(null)}>
         <View style={styles.modalOverlay}>
           <View style={styles.modalBox}>
-            <Text style={styles.modalTitle2}>Accept this order?</Text>
+            <Text style={styles.modalTitle2}>{dialog?.title}</Text>
             <Text style={styles.modalMessage}>
-              Once accepted, this order will be assigned to you.
+              {dialog?.message}
             </Text>
             <View style={styles.modalButtons}>
-              <TouchableOpacity
+              {dialog?.onConfirm && <TouchableOpacity
                 style={[styles.modalBtn, styles.cancelBtn]}
-                onPress={() => setShowConfirmModal(false)}>
+                onPress={() => setDialog(null)}>
                 <Text style={styles.cancelText}>Cancel</Text>
-              </TouchableOpacity>
+              </TouchableOpacity>}
               <TouchableOpacity
-                style={[styles.modalBtn, styles.confirmBtn]}
-                onPress={confirmAcceptOrder}>
-                <Text style={styles.confirmText}>Yes, Accept</Text>
+                style={[styles.modalBtn, styles.confirmBtn, !dialog?.onConfirm && {backgroundColor: palette.primary}]}
+                onPress={confirmDialog}>
+                <Text style={styles.confirmText}>{dialog?.confirmText || 'OK'}</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -603,7 +547,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     marginLeft: theme.spacing.m,
     fontSize: theme.typography.title,
-    color: '#fff',
+    color: palette.surface,
     fontWeight: '600',
   },
   scrollContent: {
@@ -676,13 +620,13 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   highlightedEarning: {
-    backgroundColor: '#FFF8E1',
+    backgroundColor: palette.successSoft,
     borderRadius: 8,
     padding: theme.spacing.m,
     marginBottom: theme.spacing.m,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: theme.colors.primary,
+    borderColor: palette.success,
   },
   highlightedEarningLabel: {
     fontSize: theme.typography.body,
@@ -699,7 +643,7 @@ progressContainer: {
   alignItems: 'center',
   justifyContent: 'space-between',
   padding: theme.spacing.m,
-  backgroundColor: '#fff', 
+  backgroundColor: palette.surface, 
   borderRadius: 12,
   marginBottom: theme.spacing.m,
   elevation: 6,
@@ -769,7 +713,7 @@ progressContainer: {
     flexDirection: 'row',
   },
   actionButtonText: {
-    color: '#fff',
+    color: palette.surface,
     fontSize: theme.typography.body,
     fontWeight: '700',
   },
@@ -777,7 +721,7 @@ progressContainer: {
   vendorButton: {backgroundColor: theme.colors.lightBlue},
   completeButton: {backgroundColor: theme.colors.primary},
   successMessage: {
-    backgroundColor: '#F0FFF4', // Light green background
+    backgroundColor: palette.successSoft, // Light green background
   },
   successMessageText: {
     color: theme.colors.success,
@@ -785,61 +729,6 @@ progressContainer: {
     fontWeight: '700',
     marginLeft: theme.spacing.s,
   },
-  modalContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.6)',
-  },
-  modalContent: {
-    width: '85%',
-    backgroundColor: theme.colors.card,
-    borderRadius: 15,
-    padding: theme.spacing.m * 1.5,
-    alignItems: 'center',
-  },
-  modalTitle: {
-    fontSize: theme.typography.title,
-    fontWeight: '700',
-    color: theme.colors.textPrimary,
-    marginBottom: theme.spacing.s,
-  },
-  modalSubtitle: {
-    fontSize: theme.typography.body,
-    color: theme.colors.textSecondary,
-    textAlign: 'center',
-    marginBottom: theme.spacing.m,
-  },
-  otpContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    marginBottom: theme.spacing.m * 1.5,
-  },
-  otpInput: {
-    width: width * 0.12,
-    height: width * 0.12,
-    borderWidth: 1,
-    borderColor: theme.colors.border,
-    textAlign: 'center',
-    fontSize: moderateScale(18),
-    marginHorizontal: width * 0.015,
-    borderRadius: 10,
-    color: theme.colors.textPrimary,
-    backgroundColor: theme.colors.background,
-  },
-  modalButton: {
-    backgroundColor: theme.colors.primary,
-    paddingVertical: hp(1.5),
-    borderRadius: 10,
-    width: '100%',
-    alignItems: 'center',
-  },
-  modalButtonText: {
-    color: 'white',
-    fontSize: theme.typography.body,
-    fontWeight: 'bold',
-  },
-
   // --- Confirmation Modal Styles ---
   modalOverlay: {
     flex: 1,
@@ -848,7 +737,7 @@ progressContainer: {
     alignItems: 'center',
   },
   modalBox: {
-    backgroundColor: '#fff',
+    backgroundColor: palette.surface,
     width: '80%',
     borderRadius: 12,
     padding: 25,
@@ -858,13 +747,13 @@ progressContainer: {
   modalTitle2: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#333',
+    color: palette.text,
     marginBottom: 10,
     textAlign: 'center',
   },
   modalMessage: {
     fontSize: 14,
-    color: '#555',
+    color: palette.textSecondary,
     marginBottom: 25,
     textAlign: 'center',
     lineHeight: 20,
@@ -875,25 +764,26 @@ progressContainer: {
     width: '100%',
   },
   modalBtn: {
+    flex: 1,
     paddingVertical: 10,
-    paddingHorizontal: 20,
+    paddingHorizontal: 8,
     borderRadius: 8,
-    marginHorizontal: 8,
-    minWidth: 100,
+    marginHorizontal: 4,
+    minWidth: 0,
     alignItems: 'center',
   },
   cancelBtn: {
-    backgroundColor: '#eee',
+    backgroundColor: palette.border,
   },
   confirmBtn: {
-    backgroundColor: '#27ae60',
+    backgroundColor: palette.success,
   },
   cancelText: {
-    color: '#333',
+    color: palette.text,
     fontWeight: '600',
   },
   confirmText: {
-    color: '#fff',
+    color: palette.surface,
     fontWeight: '600',
   },
 });

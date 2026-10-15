@@ -1,3 +1,6 @@
+import palette from '../theme/colors';
+import {useCallback as useDemoCallback} from 'react';
+import {subscribeDemo} from '../services/demoService';
 import React, { useState, useEffect, useContext, useCallback } from 'react';
 import { View, Text, TouchableOpacity, FlatList, Image, StyleSheet, TextInput, ActivityIndicator,Alert,Linking,PermissionsAndroid } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
@@ -81,7 +84,7 @@ const CompletedOrdersScreen = ({ navigation }) => {
 
 
 
-  const fetchCompletedOrders = async () => {
+  const fetchCompletedOrders = useDemoCallback(async () => {
     setLoading(true);
 
     const formatDate = (dateString) => {
@@ -103,123 +106,14 @@ const CompletedOrdersScreen = ({ navigation }) => {
     } finally {
       setLoading(false);
     }
-  };
-
-     const requestPermission = async () => {
-    if (Platform.OS === 'android') {
-      try {
-        const granted = await PermissionsAndroid.request(
-          PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
-          {
-            title: 'Location Access Required',
-            message: 'This app needs your location.',
-            buttonNeutral: 'Ask Me Later',
-            buttonNegative: 'Cancel',
-            buttonPositive: 'OK',
-          }
-        );
-        console.log('Permission result:', granted);
-        return granted === PermissionsAndroid.RESULTS.GRANTED;
-      } catch (err) {
-        console.warn('Permission error:', err);
-        return false;
-      }
-    }
-    return true; // iOS assumes permission if declared in Info.plist
-  };
-
-  useFocusEffect(
-    useCallback(() => {
-      let intervalId = null;
-
-      const getLocation = async () => {
-        const hasPermission = await requestPermission();
-        console.log('Permission granted:', hasPermission);
-        if (!hasPermission) {
-          Alert.alert(
-            'Location Permission Denied',
-            'To show tours near you, we need your location. Please enable location permission in your settings.',
-            [
-              { text: 'Open Settings', onPress: () => Linking.openSettings() },
-              { text: 'Cancel', style: 'cancel' },
-            ]
-          );
-          return false;
-        }
-        return true;
-      };
-
-      // const fetchLocation = () => {
-      //   Geolocation.getCurrentPosition(
-      //     (position) => {
-      //       const { latitude, longitude } = position.coords;
-      //       console.log('📍 Location Update (1 min) - Latitude:', latitude, 'Longitude:', longitude);
-      //       setDriverLocation({ latitude, longitude }); // Update state with latest location
-      //       // const payload={
-      //       //   user_id:user?.id,
-      //       //   latitude:latitude,
-      //       //   longitude:longitude,
-      //       //   locationId:deliveryBoylocationId
-      //       // }
-      //       // console.log(payload,'payload');
-      //       // Optionally send to backend
-      //       // ApiService.postDeliveryBoyLocation(user?.id, { latitude, longitude},deliveryBoylocationId);
-      //     },
-      //     (error) => {
-      //       console.log('❌ Error getting location:', error.code, error.message);
-      //       let message = 'Unable to fetch location. Please try again.';
-      //       if (error.code === 1) {
-      //         message = 'Location permission denied. Please enable it in settings.';
-      //       } else if (error.code === 2) {
-      //         message = 'Location services are unavailable. Please enable them.';
-      //       } else if (error.code === 3) {
-      //         message = 'Location request timed out. Please try again.';
-      //       }
-      //       Alert.alert('Location Error', message, [
-      //         { text: 'Open Settings', onPress: () => Linking.openSettings() },
-      //         { text: 'Cancel', style: 'cancel' },
-      //       ]);
-      //     },
-      //     {
-      //       enableHighAccuracy: false, // Set to true if higher accuracy is needed
-      //       timeout: 20000,
-      //       maximumAge: 30000,
-      //     }
-      //   );
-      // };
-
-      const startLocationTracking = async () => {
-        //  if (toggle !== 1) return; // Only track location when online
-
-        // if (toggle === 1) {
-          const permissionGranted = await getLocation();
-          if (!permissionGranted) return;
-
-          // Fetch location immediately
-          // fetchLocation();
-
-          // Set interval to fetch location every 10 seconds
-          intervalId = setInterval(() => {
-            // fetchLocation();
-          }, 10000);
-        // }
-      };
-
-      startLocationTracking();
-
-      // Cleanup on screen blur or component unmount
-      return () => {
-        if (intervalId !== null) {
-          clearInterval(intervalId);
-          console.log('🛑 Cleared interval');
-        }
-      };
-    }, [ user])
-  );
+  }, [fromDate, toDate, user.id]);
 
   useEffect(() => {
     fetchCompletedOrders();
-  }, [fromDate, toDate]);
+  }, [fetchCompletedOrders]);
+
+  useFocusEffect(useCallback(() => { fetchCompletedOrders(); }, [fetchCompletedOrders]));
+  useEffect(() => subscribeDemo(fetchCompletedOrders), [fetchCompletedOrders]);
 
   return (
     <>
@@ -240,7 +134,7 @@ const CompletedOrdersScreen = ({ navigation }) => {
         </View>
 
         {loading ? (
-          <ActivityIndicator size="large" color="#85360B" />
+          <ActivityIndicator size="large" color={palette.primary} />
         ) : completedOrders.length === 0 ? (
           <Text style={styles.noOrdersText}>No orders found</Text>
         ) : (
@@ -292,11 +186,11 @@ const CompletedOrdersScreen = ({ navigation }) => {
 
                   <View style={styles.column}>
                     <View style={styles.row}>
-                      <Ionicons name="location-outline" size={wp(6)} color="#85360B" />
+                      <Ionicons name="location-outline" size={wp(6)} color={palette.primary} />
                       <Text style={styles.location}>{item.shop_name}</Text>
                     </View>
                     <View style={styles.row}>
-                      <Icon name="location-arrow" size={wp(5)} color="#85360B" />
+                      <Icon name="location-arrow" size={wp(5)} color={palette.primary} />
                       <Text style={styles.location}>{item.delivery_address}</Text>
                     </View>
                   </View>
@@ -329,13 +223,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: hp(2),
     elevation: 4,
-    backgroundColor: "#85360B"
+    backgroundColor: palette.primary
   },
   headerTitle: {
     fontSize: wp(5),
     fontWeight: '600',
     marginLeft: wp(5),
-    color: "#fff"
+    color: palette.surface
   },
   container: {
     flex: 1,
@@ -349,7 +243,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   card: {
-    backgroundColor: "#fff",
+    backgroundColor: palette.surface,
     padding: 15,
     marginVertical: 10,
     borderRadius: 10,
@@ -374,7 +268,7 @@ const styles = StyleSheet.create({
   dishCode: {
     fontSize: 16,
     fontWeight: "bold",
-    color: "#333",
+    color: palette.text,
     width: 100
   },
   time: {
@@ -392,17 +286,16 @@ const styles = StyleSheet.create({
   price: {
     fontSize: 18,
     fontWeight: "bold",
-    color: "green",
-    color: "#85360B",
+    color: palette.primary,
   },
   separator: {
     height: 1,
-    backgroundColor: "#ccc",
+    backgroundColor: palette.disabled,
     marginVertical: 10,
   },
   location: {
     fontSize: 14,
-    color: "#555",
+    color: palette.textSecondary,
     marginLeft: 5,
   },
   deliveryBoyTitle: {
@@ -433,7 +326,7 @@ const styles = StyleSheet.create({
   inputRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#f9f9f9',
+    backgroundColor: palette.background,
     paddingHorizontal: 15,
     borderRadius: 5,
   },
@@ -443,8 +336,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   searchButton: {
-    backgroundColor: '#28a745',
-    backgroundColor: '#85360B',
+    backgroundColor: palette.primary,
     paddingVertical: 12,
     alignItems: 'center',
     borderRadius: 5,

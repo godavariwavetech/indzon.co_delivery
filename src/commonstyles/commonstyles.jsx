@@ -1,3 +1,4 @@
+import palette from '../theme/colors';
 import {StyleSheet} from 'react-native';
 
 const styles = StyleSheet.create({
@@ -9,15 +10,15 @@ const styles = StyleSheet.create({
   t2: {
     fontSize: 16,
     fontWeight: '400',
-    color: '#525252',
+    color: palette.textSecondary,
     textAlign: 'center',
   },
   button: {
     // flex:1,
     width: '100%',
     height: 55,
-    color: '#FF6F00',
-    backgroundColor: '#85360B',
+    color: palette.primary,
+    backgroundColor: palette.primary,
     borderRadius: 50,
     justifyContent: 'center',
     alignItems: 'center',
@@ -25,7 +26,7 @@ const styles = StyleSheet.create({
   buttontext: {
     fontSize: 18,
     fontWeight: 700,
-    color: '#fff',
+    color: palette.surface,
   },
 });
 

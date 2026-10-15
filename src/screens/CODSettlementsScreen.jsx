@@ -1,3 +1,7 @@
+import palette from '../theme/colors';
+import {useCallback as useDemoCallback} from 'react';
+import {useEffect} from 'react';
+import {subscribeDemo} from '../services/demoService';
 import React, {useContext, useState, useCallback} from 'react';
 import {
   View,
@@ -40,7 +44,7 @@ const CODSettlementsScreen = () => {
     setModalVisible(true);
   };
 
-  const fetchData = async () => {
+  const fetchData = useDemoCallback(async () => {
     try {
       if (!refreshing) setLoading(true);
 
@@ -66,13 +70,15 @@ const CODSettlementsScreen = () => {
       setLoading(false);
       setRefreshing(false);
     }
-  };
+  }, [refreshing, user?.id]);
 
   useFocusEffect(
     useCallback(() => {
       fetchData();
-    }, [user?.id]),
+    }, [fetchData]),
   );
+
+  useEffect(() => subscribeDemo(fetchData), [fetchData]);
 
   const onRefresh = () => {
     setRefreshing(true);
@@ -99,7 +105,7 @@ const CODSettlementsScreen = () => {
               <MaterialCommunityIcons
                 name="image-outline"
                 size={22}
-                color="#85360B"
+                color={palette.primary}
               />
               <Text style={styles.viewImageText}>payment image</Text>
             </TouchableOpacity>
@@ -129,7 +135,7 @@ const CODSettlementsScreen = () => {
               <MaterialCommunityIcons
                 name="shield-check-outline"
                 size={14}
-                color="#85360B"
+                color={palette.primary}
               />
               <Text style={styles.historyOtpText}>
                 {item.cod_settlement_otp || '---'}
@@ -155,7 +161,7 @@ const CODSettlementsScreen = () => {
             )}
           </View>
           {/* <View style={styles.iconCircle}>
-              <MaterialCommunityIcons name="wallet" size={24} color="#85360B" />
+              <MaterialCommunityIcons name="wallet" size={24} color="#3236FF" />
            </View> */}
         </View>
 
@@ -200,14 +206,14 @@ const CODSettlementsScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar backgroundColor="#85360B" barStyle="light-content" />
+      <StatusBar backgroundColor={palette.primary} barStyle="light-content" />
 
       {/* Professional Navbar */}
       <View style={styles.navbar}>
         <TouchableOpacity
           style={styles.navButton}
           onPress={() => navigation.openDrawer()}>
-          <Ionicons name="menu" size={26} color="#fff" />
+          <Ionicons name="menu" size={26} color={palette.surface} />
         </TouchableOpacity>
         <Text style={styles.navTitle}>COD Settlements</Text>
         <View style={styles.navButton} />
@@ -215,7 +221,7 @@ const CODSettlementsScreen = () => {
 
       {loading ? (
         <View style={styles.loaderContainer}>
-          <ActivityIndicator size="large" color="#85360B" />
+          <ActivityIndicator size="large" color={palette.primary} />
         </View>
       ) : (
         <FlatList
@@ -229,8 +235,8 @@ const CODSettlementsScreen = () => {
             <RefreshControl
               refreshing={refreshing}
               onRefresh={onRefresh}
-              colors={['#85360B']}
-              tintColor="#85360B"
+              colors={[palette.primary]}
+              tintColor={palette.primary}
             />
           }
           ListEmptyComponent={
@@ -238,7 +244,7 @@ const CODSettlementsScreen = () => {
               <MaterialCommunityIcons
                 name="file-document-outline"
                 size={60}
-                color="#CFD8DC"
+                color={palette.disabled}
               />
               <Text style={styles.emptyText}>No settlements yet</Text>
             </View>
@@ -256,7 +262,7 @@ const CODSettlementsScreen = () => {
             style={styles.closeButton}
             onPress={() => setModalVisible(false)}
             hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}>
-            <Ionicons name="close-circle" size={40} color="#fff" />
+            <Ionicons name="close-circle" size={40} color={palette.surface} />
           </TouchableOpacity>
 
           <View style={styles.modalContent}>
@@ -277,7 +283,7 @@ const CODSettlementsScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F5F7FA', // High-quality light gray
+    backgroundColor: palette.background, // High-quality light gray
   },
   navbar: {
     flexDirection: 'row',
@@ -285,7 +291,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingVertical: verticalScale(14),
     paddingHorizontal: wp(5),
-    backgroundColor: '#85360B',
+    backgroundColor: palette.primary,
     elevation: 4,
     shadowColor: '#000',
     shadowOffset: {width: 0, height: 2},
@@ -296,7 +302,7 @@ const styles = StyleSheet.create({
   navTitle: {
     fontSize: scale(17),
     fontWeight: '700',
-    color: '#fff',
+    color: palette.surface,
     letterSpacing: 0.5,
   },
   navButton: {
@@ -318,12 +324,12 @@ const styles = StyleSheet.create({
 
   // --- Premium Summary Card ---
   summaryCard: {
-    backgroundColor: '#85360B', // Brand Green
+    backgroundColor: palette.primary,
     borderRadius: 20,
     padding: moderateScale(20),
     marginBottom: verticalScale(20),
     // Sophisticated Shadow
-    shadowColor: '#85360B',
+    shadowColor: palette.primary,
     shadowOffset: {width: 0, height: 8},
     shadowOpacity: 0.25,
     shadowRadius: 12,
@@ -346,7 +352,7 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   iconCircle: {
-    backgroundColor: '#fff',
+    backgroundColor: palette.surface,
     width: 40,
     height: 40,
     borderRadius: 20,
@@ -354,7 +360,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   summaryAmount: {
-    color: '#fff',
+    color: palette.surface,
     fontSize: scale(36),
     fontWeight: 'bold',
     marginVertical: verticalScale(12),
@@ -378,7 +384,7 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
   },
   statValue: {
-    color: '#fff',
+    color: palette.surface,
     fontSize: scale(16),
     fontWeight: '700',
   },
@@ -410,7 +416,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   otpCode: {
-    color: '#fff',
+    color: palette.surface,
     fontSize: scale(22),
     fontWeight: 'bold',
     letterSpacing: 3,
@@ -427,12 +433,12 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: scale(16),
     fontWeight: '700',
-    color: '#333',
+    color: palette.text,
   },
 
   // --- Fancy History List ---
   historyCard: {
-    backgroundColor: '#fff',
+    backgroundColor: palette.surface,
     borderRadius: 16,
     padding: moderateScale(16),
     marginHorizontal: moderateScale(16),
@@ -444,7 +450,7 @@ const styles = StyleSheet.create({
     shadowRadius: 6,
     elevation: 3,
     borderWidth: 1,
-    borderColor: Platform.OS === 'ios' ? '#F0F0F0' : 'transparent',
+    borderColor: Platform.OS === 'ios' ? palette.border : 'transparent',
   },
   historyHeader: {
     flexDirection: 'row',
@@ -454,11 +460,11 @@ const styles = StyleSheet.create({
   historyDate: {
     fontSize: scale(14),
     fontWeight: '600',
-    color: '#333',
+    color: palette.text,
   },
   historySubId: {
     fontSize: scale(11),
-    color: '#999',
+    color: palette.textMuted,
     marginTop: 2,
   },
   statusBadge: {
@@ -472,7 +478,7 @@ const styles = StyleSheet.create({
   },
   cardDivider: {
     height: 1,
-    backgroundColor: '#F5F5F5',
+    backgroundColor: palette.background,
     marginVertical: verticalScale(12),
   },
   historyBody: {
@@ -484,23 +490,23 @@ const styles = StyleSheet.create({
   },
   historyLabel: {
     fontSize: scale(11),
-    color: '#90A4AE',
+    color: palette.textMuted,
     marginBottom: 4,
   },
   historyAmount: {
     fontSize: scale(15),
     fontWeight: '700',
-    color: '#333',
+    color: palette.text,
   },
   historyValue: {
     fontSize: scale(14),
     fontWeight: '600',
-    color: '#333',
+    color: palette.text,
   },
   historyOtpContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F0F9F4', // Subtle green tint
+    backgroundColor: palette.primarySoft,
     alignSelf: 'flex-start',
     paddingHorizontal: 8,
     paddingVertical: 2,
@@ -509,7 +515,7 @@ const styles = StyleSheet.create({
   historyOtpText: {
     fontSize: scale(13),
     fontWeight: '700',
-    color: '#85360B',
+    color: palette.primary,
     marginLeft: 4,
   },
 
@@ -522,7 +528,7 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     marginTop: verticalScale(12),
-    color: '#999',
+    color: palette.textMuted,
     fontSize: scale(15),
     fontWeight: '500',
   },
@@ -531,14 +537,14 @@ const styles = StyleSheet.create({
   imageButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#E8F5E9',
+    backgroundColor: palette.primarySoft,
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 8,
   },
   viewImageText: {
     fontSize: scale(10),
-    color: '#85360B',
+    color: palette.primary,
     fontWeight: '600',
     marginLeft: 4,
   },
