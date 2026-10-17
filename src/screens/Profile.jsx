@@ -1,3 +1,4 @@
+import {useFocusEffect} from '@react-navigation/native';
 import palette from '../theme/colors';
 import {useCallback} from 'react';
 import React, { useState, useEffect, useContext } from "react";
@@ -37,13 +38,9 @@ const ProfileScreen = () => {
     try {
       setLoader(true)
       const response = await ApiService.getProfileData(user);
-      console.log(response,'profile')
-      console.log(response?.status === 200 , response.data.data.length > 0)
       if (response?.status === 200 && response.data.data.length > 0) {
         
         const deliveryBoy = response.data.data[0];
-        console.log(deliveryBoy)
-
         setProfile({
           name: deliveryBoy.delivery_boy_name,
           phone: deliveryBoy.delivery_boy_mobile_number,
@@ -60,7 +57,7 @@ const ProfileScreen = () => {
     }
   }, [user]);
 
-  useEffect(() => { fetchProfileData(); }, [fetchProfileData]);
+  useFocusEffect(useCallback(() => { fetchProfileData(); }, [fetchProfileData]));
 
   const handleEdit = () => {
     navigation.navigate("EditProfile", { profile,fetchProfileData });

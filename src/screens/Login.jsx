@@ -87,8 +87,7 @@ const LoginScreen = ({ navigation }) => {
       try {
         const response = await ApiService.login(mobileNumber, password);
         if (response.status === 200 && response.data.length > 0) {
-          console.log('Login Success:', response);
-          login(response.data[0]);
+          await login(response.data[0]);
 
         } else if (response.status === 300) {
           setAlertMessage('Please wait until verification is complete from Admin');

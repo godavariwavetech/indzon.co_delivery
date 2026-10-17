@@ -1,6 +1,6 @@
 import palette from '../theme/colors';
-import {useCallback as useDemoCallback} from 'react';
-import React, {useState, useEffect, useContext} from 'react';
+import {useCallback} from 'react';
+import React, {useState, useEffect, useContext, useRef} from 'react';
 import {
   View,
   Text,
@@ -12,6 +12,8 @@ import {
   Dimensions,
   StatusBar,
   Platform,
+  Linking,
+  TextInput,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import {useNavigation} from '@react-navigation/native';
@@ -67,9 +69,39 @@ const OrderTrackingScreen = ({route}) => {
 
   const [orderStatus, setOrderStatus] = useState(orderDetails.order_status);
   const [orderItems, setOrderItems] = useState(null);
+  const [showOtpModal, setShowOtpModal] = useState(false);
+  const [otp, setOtp] = useState(['', '', '', '']);
+  const otpInputs = useRef([]);
+  const [focusedOtpIndex, setFocusedOtpIndex] = useState(0);
+
+  const focusOtpInput = index => {
+    setFocusedOtpIndex(index);
+    otpInputs.current[index]?.focus();
+  };
+
+  const handleOtpChange = (index, value) => {
+    const digit = value.replace(/\D/g, '').slice(-1);
+    if (value && !digit) return;
+    setOtp(previous => previous.map((item, position) => position === index ? digit : item));
+    if (digit && index < 3) focusOtpInput(index + 1);
+  };
+
+  const handleOtpKeyPress = (index, key) => {
+    if (key === 'Backspace' && !otp[index] && index > 0) {
+      setOtp(previous => previous.map((item, position) => position === index - 1 ? '' : item));
+      focusOtpInput(index - 1);
+    }
+  };
+
+  useEffect(() => {
+    if (__DEV__ && showOtpModal) {
+      console.log('******OTP**********', String(orderDetails.customer_otp), 'Order:', orderDetails.order_ids || orderDetails.order_id);
+    }
+  }, [showOtpModal, orderDetails.customer_otp, orderDetails.order_ids, orderDetails.order_id]);
+  const [detailsLoading, setDetailsLoading] = useState(true);
   const [dialog, setDialog] = useState(null);
   const [submitting, setSubmitting] = useState(false);
-  const showMessage = useDemoCallback((title, message) => {
+  const showMessage = useCallback((title, message) => {
     setDialog({title, message});
   }, []);
 
@@ -90,9 +122,9 @@ const OrderTrackingScreen = ({route}) => {
 
 
 
-  console.log(orderDetails, '>>>>>>>>>>>>>>>>>>>VVVV');
 
-  const fetchOrders = useDemoCallback(async () => {
+  const fetchOrders = useCallback(async () => {
+    setDetailsLoading(true);
     try {
       const response = await ApiService.getOrderDetails(
         orderDetails.id || orderDetails.order_id,
@@ -107,17 +139,25 @@ const OrderTrackingScreen = ({route}) => {
       }
     } catch (error) {
       showMessage('Error', error.message || 'Something went wrong.');
+    } finally {
+      setDetailsLoading(false);
     }
   }, [orderDetails.id, orderDetails.order_id, showMessage]);
 
   useEffect(() => { fetchOrders(); }, [fetchOrders]);
 
   const openGoogleMaps = (lat, lng) => {
-    showMessage('Delivery Route', `${orderDetails.shop_address} → ${orderDetails.delivery_address}`);
+    const scheme = Platform.OS === 'ios' ? 'maps:' : 'geo:';
+    Linking.openURL(`${scheme}0,0?q=${lat},${lng}`).catch(() =>
+      showMessage('Error', 'Could not open maps.'),
+    );
   };
 
   const makePhoneCall = phoneNumber => {
-    showMessage('Contact', `Simulated call to ${phoneNumber}`);
+    if (!phoneNumber) return showMessage('Error', 'No phone number available.');
+    Linking.openURL(`tel:${phoneNumber}`).catch(() =>
+      showMessage('Error', 'Could not open dialer.'),
+    );
   };
 
   // --- API Handlers ---
@@ -142,7 +182,7 @@ const OrderTrackingScreen = ({route}) => {
       const response = await ApiService.acceptorders(payload);
       if (response?.status === 200) {
         setOrderStatus(8);
-        // Shared demo store already updated the home screen.
+        route.params.handleAccept?.();
         showMessage('Success', 'Order accepted successfully.');
       } else {
         showMessage('Error', response?.message || 'Failed to accept order.');
@@ -170,15 +210,26 @@ const OrderTrackingScreen = ({route}) => {
   };
 
   const completedOrder = async () => {
+    if (submitting) return;
+    const enteredOtp = otp.join('');
+    if (!/^\d{4}$/.test(enteredOtp) || enteredOtp !== String(orderDetails.customer_otp)) {
+      showMessage('Error', 'The entered OTP is incorrect.');
+      return;
+    }
+    setSubmitting(true);
     const payload = {
       order_id: orderDetails.order_id,
       delivery_id: user.id,
+      delivery_otp: enteredOtp,
       customer_id: orderDetails?.customer_id,
     };
     try {
       const response = await ApiService.completedorder(payload);
       if (response?.status === 200) {
         setOrderStatus(3);
+        setShowOtpModal(false);
+        setOtp(['', '', '', '']);
+        route.params.handleComplete?.(orderDetails.order_id);
         // Delay navigation to allow user to see completed status
         setTimeout(() => navigation.goBack(), 1000);
       } else {
@@ -186,6 +237,8 @@ const OrderTrackingScreen = ({route}) => {
       }
     } catch (error) {
       showMessage('Error', error.message || 'Something went wrong.');
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -325,7 +378,10 @@ const OrderTrackingScreen = ({route}) => {
           <TouchableOpacity
             style={[styles.actionButton, styles.completeButton]}
             disabled={submitting}
-            onPress={completedOrder}>
+            onPress={() => {
+              setOtp(['', '', '', '']);
+              setShowOtpModal(true);
+            }}>
             <Text style={styles.actionButtonText}>Deliver Order</Text>
           </TouchableOpacity>
         );
@@ -354,6 +410,10 @@ const OrderTrackingScreen = ({route}) => {
       </View>
     );
   }
+
+  const instructionDetails = orderItems?.orderdata?.[0];
+  const orderInstructions = String(instructionDetails?.order_instructions || '').trim();
+  const deliveryInstructions = String(instructionDetails?.delivery_instruction || '').trim();
 
   // --- Render ---
   return (
@@ -482,14 +542,25 @@ const OrderTrackingScreen = ({route}) => {
         )}
 
         <InfoCard title="Pickup & Delivery Instructions" icon="information-circle-outline">
-          <Text style={styles.detailValue}>{orderDetails.pickup_instructions}</Text>
-          <Text style={styles.detailValue}>{orderDetails.delivery_instructions}</Text>
+          {detailsLoading ? (
+            <Text style={styles.detailValue}>Loading instructions...</Text>
+          ) : orderItems ? (
+            <>
+              <Text style={styles.detailLabel}>Order instructions</Text>
+              <Text style={styles.detailValue}>{orderInstructions || 'No order instructions provided.'}</Text>
+              <Text style={styles.detailLabel}>Delivery instructions</Text>
+              <Text style={styles.detailValue}>{deliveryInstructions || 'No delivery instructions provided.'}</Text>
+            </>
+          ) : (
+            <Text style={styles.detailValue}>Instructions could not be loaded. Reopen the order to retry.</Text>
+          )}
         </InfoCard>
         {/* --- Order Items --- */}
         <InfoCard title="Order Items" icon="fast-food-outline">
-          {orderItems?.orderitemdata.map((item, index) => (
+          {detailsLoading && <Text style={styles.detailValue}>Loading...</Text>}
+          {orderItems?.orderitemdata?.map((item, index) => (
             <View key={index} style={styles.itemRow}>
-              <Image source={require("../assets/dishimage.jpg")} style={styles.itemImage} />
+              <Image source={item.item_image ? {uri: item.item_image} : require("../assets/dishimage.jpg")} style={styles.itemImage} />
               <View style={styles.itemDetails}>
                 <Text style={styles.itemName}>{item.item_name}</Text>
                 <Text style={styles.itemQty}>
@@ -503,6 +574,38 @@ const OrderTrackingScreen = ({route}) => {
 
       <View style={[styles.footer,{bottom:insets.bottom}]}>{getAction()}</View>
 
+      <Modal visible={showOtpModal} transparent animationType="fade" onShow={() => focusOtpInput(0)} onRequestClose={() => setShowOtpModal(false)}>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalBox}>
+            <Text style={styles.modalTitle2}>Enter OTP</Text>
+            <Text style={styles.modalMessage}>Enter the customer's OTP to complete delivery.</Text>
+            <View style={styles.otpRow}>
+              {otp.map((digit, index) => (
+                <TextInput
+                  key={index}
+                  ref={input => { otpInputs.current[index] = input; }}
+                  accessibilityLabel={`OTP digit ${index + 1}`}
+                  testID={`delivery-otp-${index}`}
+                  value={digit}
+                  onChangeText={value => handleOtpChange(index, value)}
+                  onKeyPress={({nativeEvent}) => handleOtpKeyPress(index, nativeEvent.key)}
+                  onFocus={() => setFocusedOtpIndex(index)}
+                  maxLength={1}
+                  keyboardType="number-pad"
+                  selectTextOnFocus
+                  editable={!submitting}
+                  caretHidden
+                  style={[styles.otpInput, focusedOtpIndex === index && styles.otpInputFocused]}
+                />
+              ))}
+            </View>
+            <View style={styles.modalButtons}>
+              <TouchableOpacity style={[styles.modalBtn, styles.cancelBtn]} onPress={() => setShowOtpModal(false)}><Text style={styles.cancelText}>Cancel</Text></TouchableOpacity>
+              <TouchableOpacity disabled={submitting} style={[styles.modalBtn, styles.confirmBtn]} onPress={completedOrder}><Text style={styles.confirmText}>Submit</Text></TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
       {/* --- Confirmation Modal --- */}
       <Modal
         visible={dialog !== null}
@@ -510,7 +613,7 @@ const OrderTrackingScreen = ({route}) => {
         animationType="fade"
         onRequestClose={() => setDialog(null)}>
         <View style={styles.modalOverlay}>
-          <View style={styles.modalBox}>
+          <View style={[styles.modalBox, styles.confirmationBox]}>
             <Text style={styles.modalTitle2}>{dialog?.title}</Text>
             <Text style={styles.modalMessage}>
               {dialog?.message}
@@ -519,12 +622,12 @@ const OrderTrackingScreen = ({route}) => {
               {dialog?.onConfirm && <TouchableOpacity
                 style={[styles.modalBtn, styles.cancelBtn]}
                 onPress={() => setDialog(null)}>
-                <Text style={styles.cancelText}>Cancel</Text>
+                <Text numberOfLines={1} style={styles.cancelText}>Cancel</Text>
               </TouchableOpacity>}
               <TouchableOpacity
-                style={[styles.modalBtn, styles.confirmBtn, !dialog?.onConfirm && {backgroundColor: palette.primary}]}
+                style={[styles.modalBtn, styles.confirmBtn, styles.confirmationPrimaryBtn, !dialog?.onConfirm && {backgroundColor: palette.primary}]}
                 onPress={confirmDialog}>
-                <Text style={styles.confirmText}>{dialog?.confirmText || 'OK'}</Text>
+                <Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.85} style={styles.confirmText}>{dialog?.confirmText || 'OK'}</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -744,6 +847,14 @@ progressContainer: {
     elevation: 6,
     alignItems: 'center',
   },
+  confirmationBox: {
+    width: '90%',
+    maxWidth: 400,
+    padding: 24,
+  },
+  confirmationPrimaryBtn: {
+    flex: 1.5,
+  },
   modalTitle2: {
     fontSize: 18,
     fontWeight: 'bold',
@@ -758,6 +869,31 @@ progressContainer: {
     textAlign: 'center',
     lineHeight: 20,
   },
+  otpRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+    maxWidth: 260,
+    marginBottom: 24,
+  },
+  otpInput: {
+    width: '21%',
+    height: 54,
+    borderWidth: 1,
+    borderColor: palette.border,
+    borderRadius: 10,
+    backgroundColor: palette.background,
+    color: palette.text,
+    textAlign: 'center',
+    fontSize: 24,
+    fontWeight: '600',
+    padding: 0,
+  },
+  otpInputFocused: {
+    borderColor: palette.primary,
+    borderWidth: 2,
+    backgroundColor: palette.primarySoft,
+  },
   modalButtons: {
     flexDirection: 'row',
     justifyContent: 'center',
@@ -765,15 +901,19 @@ progressContainer: {
   },
   modalBtn: {
     flex: 1,
+    minHeight: 48,
     paddingVertical: 10,
     paddingHorizontal: 8,
     borderRadius: 8,
     marginHorizontal: 4,
     minWidth: 0,
     alignItems: 'center',
+    justifyContent: 'center',
   },
   cancelBtn: {
-    backgroundColor: palette.border,
+    backgroundColor: palette.background,
+    borderWidth: 1,
+    borderColor: palette.border,
   },
   confirmBtn: {
     backgroundColor: palette.success,

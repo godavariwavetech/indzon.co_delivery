@@ -14,13 +14,13 @@ const EditProfileScreen = () => {
   const navigation = useNavigation();
   const route = useRoute();
   const { profile, fetchProfileData } = route.params || {};
-  const { user, login } = useContext(AuthContext);
+  const { user } = useContext(AuthContext);
 
   // Initialize state with received data
   const [image, setImage] = useState(profile?.avatar || null);
   const [name, setName] = useState(profile?.name || "");
   const [phone, setPhone] = useState(profile?.phone || "");
-  const [password, setPassword] = useState("rider1234");
+  const [password, setPassword] = useState("");
   const [address, setAddress] = useState(profile?.address || "");
   const [phoneError, setPhoneError] = useState("");
   const [passwordError, setPasswordError] = useState("");
@@ -82,15 +82,9 @@ const EditProfileScreen = () => {
         // avatar: image ? `data:image/jpeg;base64,${image}` : "",  // Optional image
         avatar: image || ''
       };
-      console.log(formData, 'formData')
-
       const response = await ApiService.updateProfileData(formData);
-      console.log(response, 'edit response>>>>>>>>>>>>>>>>>>>>>>>>>>>>>')
-
-
       if (response.status === 200) {
         Alert.alert("Success", "Profile updated successfully!");
-        await login(response.data[0]);
         fetchProfileData?.();
         navigation.goBack();
       } else {

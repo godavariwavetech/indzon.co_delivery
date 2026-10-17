@@ -1,5 +1,4 @@
 import palette from '../theme/colors';
-import {subscribeDemo} from '../services/demoService';
 import React, {useState, useEffect, useContext, useCallback} from 'react';
 import {
   View,
@@ -9,6 +8,10 @@ import {
   StatusBar,
   Alert,
   RefreshControl,
+  ActivityIndicator,
+  PermissionsAndroid,
+  Linking,
+  Platform,
   TouchableOpacity,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
@@ -25,13 +28,16 @@ import {AuthContext} from '../context/AuthContext';
 import OrderCard from '../components/orderCard'; // Corrected import name
 
 
+import {getTokenValue, onTokenRefresh} from '../NotificationService';
+import Geolocation from 'react-native-geolocation-service';
+
 const OrdersScreen = ({navigation}) => {
   const {user} = useContext(AuthContext);
-  const [orders, setOrders] = useState([]);
-  const [acceptedOrders, setAcceptedOrders] = useState([]);
 
   const [newOrders, setNewOrders] = useState([]);
   const [ongoingOrders, setOngoingOrders] = useState([]);
+  const acceptedOrders = ongoingOrders;
+  const [availabilityMessage, setAvailabilityMessage] = useState('');
 
   const [toggle, setToggle] = useState(1);
   const [loading, setLoading] = useState(true);
@@ -42,12 +48,77 @@ const OrdersScreen = ({navigation}) => {
     longitude: null,
   });
 
-  useEffect(() => {
-    const ongoingOrders = orders?.filter(
-      order => order.order_status === 2 || order.order_status === 8,
-    );
-    setAcceptedOrders(ongoingOrders);
-  }, [orders]);
+
+  const requestPermission = async () => {
+    if (Platform.OS === 'android') {
+      try {
+        const granted = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+          {
+            title: 'Location Access Required',
+            message: 'This app needs your location.',
+            buttonPositive: 'OK',
+            buttonNegative: 'Cancel',
+          },
+        );
+        return granted === PermissionsAndroid.RESULTS.GRANTED;
+      } catch (err) {
+        console.warn('Permission error:', err);
+        return false;
+      }
+    }
+    return (await Geolocation.requestAuthorization('whenInUse')) === 'granted';
+  };
+
+  useFocusEffect(
+    useCallback(() => {
+      let intervalId = null;
+      let focused = true;
+      const getLocation = async () => {
+        const hasPermission = await requestPermission();
+        if (!hasPermission) {
+          Alert.alert(
+            'Location Permission Denied',
+            'Please enable location permission in your settings.',
+            [
+              {text: 'Open Settings', onPress: () => Linking.openSettings()},
+              {text: 'Cancel', style: 'cancel'},
+            ],
+          );
+          return false;
+        }
+        return true;
+      };
+      const fetchLocation = () => {
+        Geolocation.getCurrentPosition(
+          position => {
+            const {latitude, longitude} = position.coords;
+            setDriverLocation({latitude, longitude});
+          },
+          error =>
+            console.log(
+              '❌ Error getting location:',
+              error.code,
+              error.message,
+            ),
+          {enableHighAccuracy: true, timeout: 15000, maximumAge: 10000},
+        );
+      };
+      const startLocationTracking = async () => {
+        if (toggle === 1) {
+          const permissionGranted = await getLocation();
+          if (!permissionGranted || !focused) return;
+          fetchLocation();
+          intervalId = setInterval(fetchLocation, 10000);
+        }
+      };
+      startLocationTracking();
+      return () => {
+        focused = false;
+        if (intervalId !== null) clearInterval(intervalId);
+      };
+    }, [toggle]),
+  );
 
   const fetchOrders = useCallback(
     async (showLoad = false) => {
@@ -56,31 +127,23 @@ const OrdersScreen = ({navigation}) => {
         !showLoad && setRefreshing(true);
 
         const response = await ApiService.getOrders(user);
-        if (__DEV__) {
-          console.log('[Home] Orders API response:', JSON.stringify(response, null, 2));
-        }
+
         if (response?.status === 200) {
-          setOrders(response.data);
-
-          const newOrdersData = response?.new_orders || [];
-          const ongoingOrdersData = response?.active_orders || [];
-
-          if (__DEV__) {
-            console.log(
-              '[Home] Screen data:',
-              JSON.stringify(
-                {newOrders: newOrdersData, ongoingOrders: ongoingOrdersData},
-                null,
-                2,
-              ),
-            );
-          }
-
-          setNewOrders(newOrdersData);
-          setOngoingOrders(ongoingOrdersData);
+          const activeOrders = response.active_orders || [];
+          setNewOrders(response.new_orders || []);
+          setOngoingOrders(activeOrders);
+          setAvailabilityMessage(
+            activeOrders.length >= 3
+              ? 'You have 3 ongoing orders. Complete one to see new delivery requests.'
+              : response.cod_exceeded
+                ? 'Your COD limit has been reached. Settle your pending COD amount to receive new orders.'
+                : '',
+          );
+        } else {
+          throw new Error(response?.message || 'Failed to fetch orders.');
         }
       } catch (error) {
-        console.error('Failed to fetch orders:', error);
+        if (!showLoad) Alert.alert('Error', error.message || 'Failed to fetch orders.');
       } finally {
         setLoading(false);
         setRefreshing(false);
@@ -90,31 +153,51 @@ const OrdersScreen = ({navigation}) => {
   );
 
 
-  useFocusEffect(
-    useCallback(() => {
-      fetchOrders();
-    }, [fetchOrders]),
-  );
+  useFocusEffect(useCallback(() => {
+    let active = true;
+    const sync = async (silent = true) => {
+      await fetchOrders(silent);
+      try {
+        const response = await ApiService.getProfileData(user);
+        const status = response?.data?.data?.[0]?.delivery_boy_active_status;
+        if (active && status != null) setToggle(Number(status) === 0 ? 1 : 0);
+      } catch (error) {
+        console.error('Failed to sync driver status:', error.message);
+      }
+    };
+    sync(false);
+    const timer = setInterval(sync, 10000);
+    return () => { active = false; clearInterval(timer); };
+  }, [fetchOrders, user]));
 
-  useEffect(() => subscribeDemo(() => {
-    fetchOrders(true);
-    ApiService.getProfileData().then(response => {
-      setToggle(response.data.data[0].delivery_boy_active_status === 0 ? 1 : 0);
+  useEffect(() => {
+    if (!user?.id) return;
+    getTokenValue().then(token => token && ApiService.uploadFcmToken(
+      token, user.id, user.delivery_boy_location_id,
+    )).catch(error => console.error('Push registration failed:', error.message));
+    return onTokenRefresh(token => {
+      ApiService.uploadFcmToken(token, user.id, user.delivery_boy_location_id)
+        .catch(error => console.error('Push token refresh failed:', error.message));
     });
-  }), [fetchOrders]);
+  }, [user?.id, user?.delivery_boy_location_id]);
+
   const handleAccept = async orderId => {
+    if (acceptedOrders.length >= 3) {
+      Alert.alert('Order Limit Reached', 'You can only have 3 ongoing orders.');
+      return;
+    }
     try {
-      await ApiService.acceptorders({order_id: orderId});
+      const response = await ApiService.acceptorders({
+        deliveryarr: [user], id: user.id, order_status: 8, order_id: orderId,
+      });
+      if (response?.status !== 200) throw new Error(response?.message || 'Failed to accept order.');
       await fetchOrders(true);
-    } catch (error) { Alert.alert('Error', error.message); }
+    } catch (error) {
+      Alert.alert('Error', error.message || 'Failed to accept order.');
+    }
   };
 
-  const handleComplete = orderId => {
-    setOrders(prevOrders =>
-      prevOrders?.filter(order => order.order_ids !== orderId),
-    );
-    fetchOrders();
-  };
+  const handleComplete = () => fetchOrders(true);
 
   const handleCardPress = item => {
     if (item.order_status === 1 && acceptedOrders?.length >= 3) {
@@ -126,8 +209,7 @@ const OrdersScreen = ({navigation}) => {
     }
     navigation.navigate('Ordertracking', {
       orderDetails: item,
-      handleAccept: () =>
-        handleAccept(item.id || item.order_id || item.order_ids),
+      handleAccept: () => fetchOrders(true),
       handleComplete,
       driverLocation: driverLocation,
     });
@@ -199,6 +281,7 @@ const OrdersScreen = ({navigation}) => {
           </View>
 
           <View style={styles.container}>
+            {loading && <ActivityIndicator size="large" color={palette.primary} />}
             {toggle === 0 && acceptedOrders?.length === 0 ? (
               <View style={styles.offlineContainer}>
                 <Icon name="wifi" size={scale(50)} color="gray" />
@@ -216,7 +299,11 @@ const OrdersScreen = ({navigation}) => {
                 {filteredOrders?.length === 0 && !loading ? (
                   <View style={styles.noOrdersContainer}>
                     <Icon name="inbox" size={scale(50)} color="gray" />
-                    <Text style={styles.noOrdersText}>No Orders Available</Text>
+                    <Text style={styles.noOrdersText}>
+                      {activeTab === 'new' && availabilityMessage
+                        ? availabilityMessage
+                        : 'No Orders Available'}
+                    </Text>
                   </View>
                 ) : (
                   // --- MODIFICATION START: Pass props to OrderCard ---

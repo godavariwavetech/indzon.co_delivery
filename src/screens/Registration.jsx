@@ -69,7 +69,6 @@ const Registration = () => {
       // setLoading(true);
       // setRefreshing(true);
       const response = await ApiService.getLocations();
-      console.log(response, 'LOCATIONS');
       if (response?.status === 200) {
         setLocations(response.data);
       } else {
@@ -208,7 +207,6 @@ const Registration = () => {
     if (!validateForm()) {
       return;
     }
-    console.log("HELLO");
     const formSubmissionData = {
       name: formData.name,
       phoneNumber: formData.phoneNumber,
@@ -230,7 +228,6 @@ const Registration = () => {
       delivery_boy_location_id: locationId
     };
 
-    console.log(formSubmissionData, 'registration2');
     deliveryBoyRegistration(formSubmissionData);
   };
 
@@ -238,16 +235,14 @@ const Registration = () => {
     try {
       setLoader(true)
       const resp = await ApiService.registration(formSubmissionData);
-      console.log(resp, 'APIresp>>>>>>>...');
       if (resp?.status === 200) {
-        console.log(resp.data, 'resp.data');
         Alert.alert('Registration Successfull');
         navigation.goBack();
       } else {
         Alert.alert("Error", resp?.message || "Failed to submit.");
       }
     } catch (error) {
-      console.log("Error", error.message || "Something went wrong.")
+      Alert.alert('Error', error.message || 'Registration failed. Please try again.');
     } finally {
       setLoader(false)
     }
@@ -268,7 +263,6 @@ const Registration = () => {
         [field]: value,
       }));
     }
-    console.log(locationId, 'locationId')
     // Clear error when user starts typing
     if (errors[field]) {
       setErrors(prev => ({

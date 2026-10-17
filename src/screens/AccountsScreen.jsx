@@ -1,6 +1,5 @@
 import palette from '../theme/colors';
-import {useCallback as useDemoCallback} from 'react';
-import {subscribeDemo} from '../services/demoService';
+import {useCallback} from 'react';
 import React, {useContext, useEffect} from 'react';
 import {
   View,
@@ -32,13 +31,20 @@ const AccountsScreen = () => {
   const onlineEarnings = paymentSummary?.delivery_charges;
   const finalPaymentAmount = onlineEarnings - cashInHand;
 
-  const fetchReportingHistory = useDemoCallback(async () => {
+  const fetchReportingHistory = useCallback(async () => {
     try {
       setLoading(true);
       setError(false);
       const response = await ApiService.getReportingHistory(user?.id);
-      console.log(response.data.data[0],"???????????????????response.data.data[0]Accounts");
-      setPaymentSummary(response.data.data[0] || {});
+      if (response?.status !== 200) throw new Error(response?.message || 'Failed to fetch accounts.');
+      const summary = response?.data?.data?.[0];
+      if (summary) {
+        const normalized = {...summary};
+        ['total_amount', 'cod_amount', 'pay_online_amount', 'delivery_charges', 'total_deliveryboy_amount'].forEach(key => {
+          if (normalized[key] != null) normalized[key] = Number(normalized[key]);
+        });
+        setPaymentSummary(normalized);
+      } else setPaymentSummary({});
     } catch (error) {
       console.error('Error fetching reporting history:', error);
 
@@ -60,7 +66,6 @@ const AccountsScreen = () => {
     return unsubscribe;
   }, [navigation, fetchReportingHistory]);
 
-  React.useEffect(() => subscribeDemo(fetchReportingHistory), [fetchReportingHistory]);
 
   const handleRefresh = () => {
     setRefreshing(true);
@@ -69,7 +74,6 @@ const AccountsScreen = () => {
 
   // console.log(object);
 
-  console.log(paymentSummary,">>>>>>>>>>>>>>>>>>>>>>>paymentSummary");
 
   return (
     <View style={styles.container}>
@@ -254,7 +258,7 @@ const AccountsScreen = () => {
                 <Text style={styles.methodText}>Cash in Hand</Text>
                 <View style={styles.paymentDetails}>
                   <Text style={styles.detailText}>
-                    {paymentSummary.cash_in_hand_count} orders
+                    {paymentSummary.cod_count} orders
                   </Text>
                   <Text style={[styles.detailText, {color: palette.primary}]}>
                     ₹{paymentSummary.cod_amount?.toFixed(0)}

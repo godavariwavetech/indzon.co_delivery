@@ -1,16 +1,10 @@
 import axios from 'axios';
-import {Alert} from 'react-native';
 
-// Base API URL
-
-// const API_BASE_URL ='https://varadhifood.com:2636/delivery_boy'
-// const API_BASE_URL = 'https://apiamara.godavariwave.com/delivery_boy'
-
-const API_BASE_URL = 'https://amaraa.co.in:2026/delivery_boy'
+import {DELIVERY_API_BASE_URL, PUBLIC_API_BASE_URL} from '../config/api';
 
 // Create Axios instance
 const apiClient = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: DELIVERY_API_BASE_URL,
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
@@ -19,7 +13,7 @@ const apiClient = axios.create({
 
 // Create Axios instance
 const publicapiClient = axios.create({
-  baseURL: 'https://varadhifood.com:2636/public_app',
+  baseURL: PUBLIC_API_BASE_URL,
   timeout: 10000, // 10 seconds timeout
   headers: {
     'Content-Type': 'application/json',
@@ -28,10 +22,21 @@ const publicapiClient = axios.create({
 
 
 // 🔹 Centralized error handler function
+// Reject missing configuration before Axios can issue a relative request.
+[apiClient, publicapiClient].forEach(client => {
+  client.interceptors.request.use(config => {
+    const isLocalDevelopment = __DEV__ && /^http:\/\/127\.0\.0\.1:2406\//.test(config.baseURL || '');
+    if (!isLocalDevelopment && !/^https:\/\/[^/]+/.test(config.baseURL || '')) {
+      throw new Error('Indzon API URL is not configured. Set src/config/api.js.');
+    }
+    return config;
+  });
+});
+
 const handleApiError = error => {
   if (error.response) {
-    console.error('API Error:', error.response.data);
-    return error.response.data;
+    const data = error.response.data;
+    return typeof data === 'object' && data !== null ? data : {message: 'Request failed. Please try again.'};
   } else if (error.request) {
     // console.error('Network Error:', error.request);
     // Alert.alert(
@@ -40,8 +45,7 @@ const handleApiError = error => {
     // );
     return {message: 'Network error, please try again later.'};
   } else {
-    console.error('Unexpected Error:', error.message);
-    return {message: 'Something went wrong. Please try again.'};
+    return {message: error.message || 'Something went wrong. Please try again.'};
   }
 };
 
@@ -50,7 +54,6 @@ const ApiService = {
   // 🔹 User Login
   login: async (number, password) => {
     try {
-      console.log({number, password},"++++++++++++++{number, password}")
       const response = await apiClient.post('/logincheck', {number, password});
       return response.data;
     } catch (error) {
@@ -61,20 +64,16 @@ const ApiService = {
   // 🔹 Fetch Orders
   getOrders: async user => {
     try {
-      console.log(user,">>>>>>>>>>>>>>>>>>>>>>>>>User");
       const response = await apiClient.post('/getcurrentorders', user);
 
       return response.data;
     } catch (error) {
-      console.log(error,">>>>>>>>>>ERROR");
       throw handleApiError(error);
     }
   },
   getOrderDetails: async id => {
     try {
-      console.log(id,"+++++>>>IDDDD")
       const response = await apiClient.post('/getorderdetails', {order_id: id});
-      console.log(">>>>>>>>>OrderDDDDDOREEPEPE",response);
       return response.data;
     } catch (error) {
       throw handleApiError(error);
@@ -113,7 +112,6 @@ const ApiService = {
   registration: async payload => {
     try {
       const resp = await apiClient.post('/adddeliveryboy', payload);
-      console.log(resp,"+++++++++++++++++DELEVERRERERERERERER")
       return resp.data;
     } catch (error) {
       throw handleApiError(error);
@@ -150,14 +148,12 @@ const ApiService = {
   },
 
   updateProfileData: async data => {
-    console.log('222', data);
     try {
       const response = await apiClient.post(`/updateprofiledata`, data);
 
       return response.data;
     } catch (error) {
-      console.error('API Error:', error);
-      return {success: false, message: 'Failed to update profile'};
+      throw handleApiError(error);
     }
   },
 
@@ -170,8 +166,7 @@ const ApiService = {
       });
       return response.data; // Assuming the API returns an array of completed orders
     } catch (error) {
-      console.error('Error fetching completed orders:', error);
-      throw error;
+      throw handleApiError(error);
     }
   },
 
@@ -186,8 +181,7 @@ const ApiService = {
       // console.log("Payments Response:", response.data);
       return response.data;
     } catch (error) {
-      console.error('Error fetching payments:', error);
-      throw error;
+      throw handleApiError(error);
     }
   },
 
@@ -200,8 +194,7 @@ const ApiService = {
       );
       return response.data;
     } catch (error) {
-      console.error('Error fetching contact us details:', error);
-      throw error;
+      throw handleApiError(error);
     }
   },
 
@@ -210,14 +203,9 @@ const ApiService = {
       const response = await apiClient.post('/deliveryboypayments', {
         deliveryboy_id: deliveryboy_id,
       });
-      console.log(
-        response,
-        '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>deliveryboypayments',
-      );
       return response.data;
     } catch (error) {
-      console.error('Error fetching contact us details:', error);
-      throw error;
+      throw handleApiError(error);
     }
   },
 
@@ -228,32 +216,20 @@ const ApiService = {
         fromdate: `${fromdate}`,
         todate: `${todate}`,
       });
-      console.log(response, '++++++++++Response>>>>>>>>>>>>>>>');
       return response.data;
     } catch (error) {
-      console.error('Error fetching contact us details:', error);
-      throw error;
+      throw handleApiError(error);
     }
   },
 
   uploadFcmToken: async (fcm_token, user_id, delivery_boy_location_id) => {
     try {
-      console.log(
-        {
-          player_id: fcm_token,
-          user_id: user_id,
-          user_type: 2,
-          location_id: delivery_boy_location_id,
-        },
-        'fcm_token,user_id>>>>>>>>>>>>>>>>>>>',
-      );
       const response = await apiClient.post('/postplayer_id', {
         player_id: fcm_token,
         user_id: user_id,
         user_type: 2,
         location_id: delivery_boy_location_id,
       });
-      console.log('Response>>>>>>>>>>>POst player', response);
       return response.data;
     } catch (error) {
       throw handleApiError(error);
@@ -265,7 +241,6 @@ const ApiService = {
       const response = await apiClient.post('/checkthemobilenumber', {
         number: number,
       });
-      console.log('Response>>>>>>>>>>>', response);
       return response.data;
     } catch (error) {
       throw handleApiError(error);
@@ -276,16 +251,11 @@ const ApiService = {
   resetPassword: async (number,password) => {
     try {
 
-      console.log({
-       "number":number,
-       "password":password
-      },"++++++++++++++++++++++AAPAPAPPARESET")
       // return
       const response = await apiClient.post('/updatenewpassword', {
        "number":number,
        "password":password
       })
-      console.log('Response>>>>>>>>>>>', response);
       return response.data;
     } catch (error) {
       throw handleApiError(error);
@@ -294,15 +264,10 @@ const ApiService = {
 
     updateDriverStatus: async (status,id) => {
     try {
-      console.log({ 
-        active_status:status,
-        deliveryboy_id:id
-      })
       const response = await apiClient.post("/deliveryboyactivestatus", { 
         active_status:status,
         deliveryboy_id:id
       });
-      console.log(response,"+++++++++++++UPDATEA RESPONSE")
       return response.data;
     } catch (error) {
       throw handleApiError(error)
@@ -313,7 +278,6 @@ const ApiService = {
       const response = await apiClient.post('/getcodamounts', {
         deliveryboy_id: deliveryboy_id,
       });
-      console.log(response.data?.data,">>>>>>>>>>>>>>>>>>>>>>>>>>>>response.data?.data");
       return response.data?.data;
     } catch (error) {
       throw handleApiError(error);

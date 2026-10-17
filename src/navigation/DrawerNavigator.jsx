@@ -9,7 +9,7 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import OrdersScreen from '../screens/Orders';
 import CompletedOrders from '../screens/CompletedOrders';
 import Payment from '../screens/Payment';
-import DemoPreferences from '../screens/DemoPreferences';
+import Preferences from '../screens/Preferences';
 import Contact from '../screens/Contact';
 import ProfileScreen from '../screens/Profile';
 import EditProfileScreen from '../screens/EditProfile';
@@ -97,8 +97,8 @@ const DrawerNavigator = () => {
         />
 
         <Drawer.Screen name="Earnings" component={Payment} options={{drawerIcon: ({color}) => <MaterialIcons name="payments" size={22} color={color} />}} />
-        <Drawer.Screen name="Notifications" component={DemoPreferences} options={{drawerIcon: ({color}) => <MaterialIcons name="notifications" size={22} color={color} />}} />
-        <Drawer.Screen name="Settings" component={DemoPreferences} options={{drawerIcon: ({color}) => <MaterialIcons name="settings" size={22} color={color} />}} />
+        <Drawer.Screen name="Notifications" component={Preferences} options={{drawerIcon: ({color}) => <MaterialIcons name="notifications" size={22} color={color} />}} />
+        <Drawer.Screen name="Settings" component={Preferences} options={{drawerIcon: ({color}) => <MaterialIcons name="settings" size={22} color={color} />}} />
         {/* Reports */}
         <Drawer.Screen
           name="Reports"

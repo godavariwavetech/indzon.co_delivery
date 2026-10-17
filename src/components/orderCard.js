@@ -7,6 +7,7 @@ import Separator from './Separator';
 
 // The component now accepts onPress and onAccept props
 const OrderCard = ({ order, onPress, onAccept }) => {
+    const [submitting, setSubmitting] = useState(false);
     const [showConfirm, setShowConfirm] = useState(false);
 
   const formatDate = (dateString) => {
@@ -25,9 +26,11 @@ const OrderCard = ({ order, onPress, onAccept }) => {
     setShowConfirm(true);
   };
 
-  const confirmAccept = () => {
+  const confirmAccept = async () => {
+    if (submitting) return;
     setShowConfirm(false);
-    if (onAccept) onAccept();
+    setSubmitting(true);
+    try { await onAccept?.(); } finally { setSubmitting(false); }
   };
 
   return (
@@ -75,7 +78,7 @@ const OrderCard = ({ order, onPress, onAccept }) => {
 
         {/* --- MODIFICATION START: Accept Button for New Orders --- */}
         {order.order_status === 1 && (
-          <TouchableOpacity style={styles.acceptButton} onPress={handleAcceptPress}>
+          <TouchableOpacity style={styles.acceptButton} disabled={submitting} onPress={handleAcceptPress}>
             <Text style={styles.acceptButtonText}>Accept Order</Text>
           </TouchableOpacity>
         )}
@@ -130,9 +133,7 @@ const styles = StyleSheet.create({
     borderColor: palette.border,
   },
   orderHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    alignItems: 'stretch',
     marginBottom: 8,
   },
   orderId: {
@@ -141,6 +142,8 @@ const styles = StyleSheet.create({
     color: palette.text,
   },
   grandTotal: {
+    marginTop: 6,
+    textAlign: 'right',
     fontSize: 15,
     fontWeight: 'bold',
     color: palette.text,

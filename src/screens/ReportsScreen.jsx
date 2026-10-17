@@ -1,6 +1,6 @@
+import {useFocusEffect} from '@react-navigation/native';
 import palette from '../theme/colors';
-import {useCallback as useDemoCallback} from 'react';
-import {subscribeDemo} from '../services/demoService';
+import {useCallback} from 'react';
 import React, { useContext, useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, ActivityIndicator, FlatList, RefreshControl } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
@@ -22,15 +22,15 @@ const ReportsScreen = () => {
   const [showStartPicker, setShowStartPicker] = useState(false);
   const [showEndPicker, setShowEndPicker] = useState(false);
 
-  const fetchReports = useDemoCallback(async () => {
+  const fetchReports = useCallback(async () => {
     try {
       setLoading(true);
       setError(false);
       const formattedStart = startDate.toISOString().split('T')[0];
       const formattedEnd = endDate.toISOString().split('T')[0];
       const response = await ApiService.getReports(user?.id, formattedStart, formattedEnd);
-      console.log(response,">>>>>>>>>>>>>>>>>responseeee reports");
-      setReports(response.data.data);
+      if (response?.status !== 200) throw new Error(response?.message || 'Failed to fetch reports.');
+      setReports(response?.data?.data || []);
     } catch (error) {
       console.error('Error fetching reports:', error);
       setError(true);
@@ -40,18 +40,13 @@ const ReportsScreen = () => {
     }
   }, [startDate, endDate, user?.id]);
 
-  useEffect(() => {
-    fetchReports();
-  }, [fetchReports]);
+  useFocusEffect(useCallback(() => { fetchReports(); }, [fetchReports]));
 
-  useEffect(() => subscribeDemo(fetchReports), [fetchReports]);
 
   const handleRefresh = () => {
     setRefreshing(true);
     fetchReports();
   };
-
-  console.log("reports>>>>>>>>>>>>>",reports)
 
   const formatDate = (dateString) => {
     if (!dateString) return 'N/A';
@@ -173,7 +168,6 @@ const ReportsScreen = () => {
     }
   };
 
-  console.log(reports,">>>>>>>>>>>>>>>>REPORTSSSSSS");
 
   return (
     <View style={styles.container}>

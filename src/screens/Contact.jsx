@@ -16,11 +16,7 @@ import { useNavigation } from '@react-navigation/native';
 
 const ContactUsScreen = () => {
   const navigation = useNavigation();
-  const [contactInfo, setContactInfo] = useState({
-    "email": "support@example.com",
-    "whatsapp": "+1234567890",
-    "phone": "+1234567890"
-  });
+  const [contactInfo, setContactInfo] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(false); // Track API failure
 
@@ -30,10 +26,10 @@ const ContactUsScreen = () => {
       setRefreshing(true);
       setError(false); // Reset error on retry
       const response = await ApiService.getContactUs();
-      console.log(response,'contacts')
       if (response.status === 200) {
-        console.log(response.data[0])
         setContactInfo(response.data[0])
+      } else {
+        throw new Error(response.message || 'Failed to fetch contact details.');
       }
     } catch (error) {
       setError(true); // Mark API call as failed
@@ -47,9 +43,32 @@ const ContactUsScreen = () => {
     fetchContactInfo(); // Fetch data on component mount
   }, []);
 
-  const handleWhatsAppPress = () => Alert.alert('Support', `Simulated WhatsApp chat with ${contactInfo.contact_number}`);
-  const handleCallPress = () => Alert.alert('Support', `Simulated call to ${contactInfo.contact_number}`);
-  const handleEmailPress = () => Alert.alert('Support', `Simulated email to ${contactInfo.mail_id}`);
+  const handleWhatsAppPress = () => {
+    if (!contactInfo?.contact_number) return Alert.alert('Error', 'No WhatsApp number available.');
+    const whatsappUrl = `https://wa.me/91${contactInfo.contact_number}`;
+    Linking.openURL(whatsappUrl).catch(() => {
+      Alert.alert('Error', 'Could not open WhatsApp.');
+    });
+  };
+
+  const handleCallPress = () => {
+    if (!contactInfo?.contact_number) return Alert.alert('Error', 'No phone number available.');
+    Linking.openURL(`tel:${contactInfo.contact_number}`).catch(() => {
+      Alert.alert('Error', 'Could not open dialer.');
+    });
+  };
+
+  const handleEmailPress = () => {
+    if (!contactInfo?.mail_id) return Alert.alert('Error', 'No email available.');
+    // const emailUrl = `mailto:${contactInfo.mail_id}`;
+    const email = contactInfo.mail_id;
+    const subject = "Contact Us";
+    const body = "Hello, I need assistance!";
+    const url = `mailto:${email}?subject=${subject}&body=${body}`;
+    Linking.openURL(url).catch(() => {
+      Alert.alert('Error', 'Could not open email client.');
+    });
+  };
 
   return (
     <>

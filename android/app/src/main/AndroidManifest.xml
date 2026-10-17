@@ -16,8 +16,8 @@ xmlns:tools="http://schemas.android.com/tools"
       android:allowBackup="false"
       android:theme="@style/AppTheme"
       android:supportsRtl="true">
-      <!-- Demo builds do not register with Firebase or collect analytics. -->
-      <meta-data android:name="firebase_messaging_auto_init_enabled" android:value="false" tools:replace="android:value" />
+      <!-- Delivery notifications use Firebase; analytics remains disabled. -->
+      <meta-data android:name="firebase_messaging_auto_init_enabled" android:value="true" tools:replace="android:value" />
       <meta-data android:name="firebase_analytics_collection_enabled" android:value="false" />
       <meta-data android:name="firebase_data_collection_default_enabled" android:value="false" />
       <activity

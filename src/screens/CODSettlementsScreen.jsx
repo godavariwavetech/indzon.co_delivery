@@ -1,9 +1,7 @@
 import palette from '../theme/colors';
-import {useCallback as useDemoCallback} from 'react';
-import {useEffect} from 'react';
-import {subscribeDemo} from '../services/demoService';
 import React, {useContext, useState, useCallback} from 'react';
 import {
+  Alert,
   View,
   Text,
   StyleSheet,
@@ -44,18 +42,17 @@ const CODSettlementsScreen = () => {
     setModalVisible(true);
   };
 
-  const fetchData = useDemoCallback(async () => {
+  const fetchData = useCallback(async () => {
     try {
-      if (!refreshing) setLoading(true);
+      setLoading(true);
 
       const [amountsResponse, historyResponse] = await Promise.all([
         ApiService.getCODAmounts(user?.id),
         ApiService.getCODSettledHistory(user?.id),
       ]);
 
-      console.log(historyResponse, '>>>>>>>>>>>>>>>>>>>.historyResponse');
 
-      if (amountsResponse.length > 0) {
+      if (amountsResponse?.length > 0) {
         setCodSummary(amountsResponse[0]);
       } else {
         setCodSummary(null);
@@ -65,12 +62,12 @@ const CODSettlementsScreen = () => {
         setHistory(historyResponse);
       }
     } catch (error) {
-      console.error('Error fetching COD settlements:', error);
+      Alert.alert('Error', error.message || 'Failed to load COD settlements.');
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
-  }, [refreshing, user?.id]);
+  }, [user?.id]);
 
   useFocusEffect(
     useCallback(() => {
@@ -78,7 +75,6 @@ const CODSettlementsScreen = () => {
     }, [fetchData]),
   );
 
-  useEffect(() => subscribeDemo(fetchData), [fetchData]);
 
   const onRefresh = () => {
     setRefreshing(true);

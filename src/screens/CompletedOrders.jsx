@@ -1,6 +1,4 @@
 import palette from '../theme/colors';
-import {useCallback as useDemoCallback} from 'react';
-import {subscribeDemo} from '../services/demoService';
 import React, { useState, useEffect, useContext, useCallback } from 'react';
 import { View, Text, TouchableOpacity, FlatList, Image, StyleSheet, TextInput, ActivityIndicator,Alert,Linking,PermissionsAndroid } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
@@ -84,7 +82,7 @@ const CompletedOrdersScreen = ({ navigation }) => {
 
 
 
-  const fetchCompletedOrders = useDemoCallback(async () => {
+  const fetchCompletedOrders = useCallback(async () => {
     setLoading(true);
 
     const formatDate = (dateString) => {
@@ -95,14 +93,14 @@ const CompletedOrdersScreen = ({ navigation }) => {
     const endDate = formatDate(toDate);
 
     try {
-      console.log({f_date: startDate, t_date: endDate, emp_id: user.id})
       const response = await ApiService.completedorders({ f_date: startDate, t_date: endDate, emp_id: user.id });
       if (response.status === 200) {
-        console.log("7777", response.data)
-        setCompletedOrders(response.data.data);
+        setCompletedOrders(response.data.data || []);
+      } else {
+        throw new Error(response.message || 'Failed to fetch completed orders.');
       }
     } catch (error) {
-      console.error("Error fetching completed orders:", error);
+      Alert.alert("Error", error.message || "Failed to fetch completed orders.");
     } finally {
       setLoading(false);
     }
@@ -113,7 +111,6 @@ const CompletedOrdersScreen = ({ navigation }) => {
   }, [fetchCompletedOrders]);
 
   useFocusEffect(useCallback(() => { fetchCompletedOrders(); }, [fetchCompletedOrders]));
-  useEffect(() => subscribeDemo(fetchCompletedOrders), [fetchCompletedOrders]);
 
   return (
     <>
@@ -139,6 +136,8 @@ const CompletedOrdersScreen = ({ navigation }) => {
           <Text style={styles.noOrdersText}>No orders found</Text>
         ) : (
           <FlatList
+            refreshing={loading}
+            onRefresh={fetchCompletedOrders}
             data={completedOrders}
             keyExtractor={(item,index) => index.toString()}
             showsVerticalScrollIndicator={false}

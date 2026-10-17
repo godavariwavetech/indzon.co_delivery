@@ -1,6 +1,6 @@
+import {useFocusEffect} from '@react-navigation/native';
 import palette from '../theme/colors';
-import {useCallback as useDemoCallback} from 'react';
-import {subscribeDemo} from '../services/demoService';
+import {useCallback} from 'react';
 import React, { useState, useEffect } from 'react';
 import {
   View,
@@ -10,12 +10,15 @@ import {
   StyleSheet,
   Dimensions,
   FlatList,
+  Alert,
   ActivityIndicator
 } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { useNavigation } from '@react-navigation/native';
+import {useContext} from 'react';
+import {AuthContext} from '../context/AuthContext';
 import ApiService from '../services/apiservice';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
@@ -61,30 +64,32 @@ const DatePickerField = ({ label, value, onChange }) => {
 
 const PaymentsScreen = () => {
   const navigation = useNavigation();
+  const {user} = useContext(AuthContext);
   const insets = useSafeAreaInsets();
   const [fromDate, setFromDate] = useState(new Date().toLocaleDateString("en-GB").split("/").join("-"));
   const [toDate, setToDate] = useState(new Date().toLocaleDateString("en-GB").split("/").join("-"));  
   const [payments, setPayments] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  const fetchPayments = useDemoCallback(async () => {
+  const fetchPayments = useCallback(async () => {
     if (!fromDate || !toDate) {
       alert('Please select both From Date and To Date.');
       return;
     }
     setLoading(true);
     try {
-      const response = await ApiService.getPayments({ from_date: fromDate, to_date: toDate });
-      setPayments(response || []);
+      const response = await ApiService.getPayments({ fromDate: fromDate.split('-').reverse().join('-'), toDate: toDate.split('-').reverse().join('-'), emp_id: user.id });
+      if (response?.status && response.status !== 200) throw new Error(response.message || 'Failed to fetch payments.');
+      const rows = Array.isArray(response) ? response : response?.data?.data || response?.data;
+      setPayments(Array.isArray(rows) ? rows : []);
     } catch (error) {
-      console.error('Error fetching payments:', error);
+      Alert.alert('Error', error.message || 'Failed to fetch payments.');
       setPayments([]);
     }
     setLoading(false);
-  }, [fromDate, toDate]);
+  }, [fromDate, toDate, user.id]);
 
-  useEffect(() => { fetchPayments(); }, [fetchPayments]);
-  useEffect(() => subscribeDemo(fetchPayments), [fetchPayments]);
+  useFocusEffect(useCallback(() => { fetchPayments(); }, [fetchPayments]));
 
   return (
     <View style={styles.container}>
@@ -112,6 +117,8 @@ const PaymentsScreen = () => {
           <FlatList
             style={styles.list}
             contentContainerStyle={[styles.listContent, {paddingBottom: Math.max(insets.bottom, 16)}]}
+            refreshing={loading}
+            onRefresh={fetchPayments}
             data={payments}
             keyExtractor={(item, index) => index.toString()}
             renderItem={({ item }) => (

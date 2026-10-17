@@ -1,6 +1,6 @@
 import palette from '../theme/colors';
-import React, { useContext, useRef, useEffect } from 'react';
-import { View, Animated, TouchableWithoutFeedback, StyleSheet } from 'react-native';
+import React, { useContext, useRef, useState } from 'react';
+import { View, Animated, TouchableWithoutFeedback, StyleSheet, Alert } from 'react-native';
 import ApiService from '../services/apiservice';
 import { AuthContext } from '../context/AuthContext';
 
@@ -17,23 +17,22 @@ const ToggleSwitch = ({ toggle, setToggle }) => {
       useNativeDriver: false,
     }).start();
     
-    // Update server status when toggle changes
-    const updateServerStatus = async () => {
-      try {
-        const status = toggle === 1 ? 0 : 1;
-        await ApiService.updateDriverStatus(status, user?.id);
-        console.log('ToggleSwitch - Server status updated:', status);
-      } catch (error) {
-        console.error('ToggleSwitch - Error updating server status:', error);
-      }
-    };
-    
-    updateServerStatus();
-  }, [toggle, user?.id, translateX]);
+  }, [toggle, translateX]);
 
-  const handleToggle = () => {
-    console.log('ToggleSwitch - Manual toggle pressed, current:', toggle);
-    setToggle(prevToggle => (prevToggle === 1 ? 0 : 1));
+  const [updating, setUpdating] = useState(false);
+  const handleToggle = async () => {
+    if (updating || !user?.id) return;
+    setUpdating(true);
+    const next = toggle === 1 ? 0 : 1;
+    try {
+      const response = await ApiService.updateDriverStatus(next === 1 ? 0 : 1, user.id);
+      if (response?.status !== 200) throw new Error(response?.message || 'Failed to update availability.');
+      setToggle(next);
+    } catch (error) {
+      Alert.alert('Error', error.message || 'Failed to update availability.');
+    } finally {
+      setUpdating(false);
+    }
   };
 
   return (

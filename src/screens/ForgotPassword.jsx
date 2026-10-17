@@ -67,7 +67,6 @@ const ForgotPassword = ({ navigation }) => {
     setLoading(true);
     try {
       const response = await ApiService.verifyMobileNumber(mobileNumber);
-      console.log(response,"++++++VERIFICATIONCHECK")
       if (response?.data?.length > 0  ) {
         setIsVerified(true);
         setTimeout(() => passwordInputRef.current?.focus(), 300);

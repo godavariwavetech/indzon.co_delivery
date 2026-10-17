@@ -1,10 +1,17 @@
-import React from 'react';
+import React, {useEffect} from 'react';
+import {listenForNotifications, requestNotificationPermission} from './src/NotificationService';
 import {SafeAreaView} from 'react-native';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 import AppNavigator from './src/navigation/AppNavigator';
 import {AuthProvider} from './src/context/AuthContext';
 
-const App = () => (
+const App = () => {
+  useEffect(() => {
+    const unsubscribe = listenForNotifications();
+    requestNotificationPermission().catch(error => console.error('Notification permission failed:', error.message));
+    return unsubscribe;
+  }, []);
+  return (
   <SafeAreaProvider>
     <SafeAreaView style={{flex: 1}}>
       <AuthProvider>
@@ -12,5 +19,6 @@ const App = () => (
       </AuthProvider>
     </SafeAreaView>
   </SafeAreaProvider>
-);
+  );
+};
 export default App;
