@@ -579,6 +579,11 @@ const OrderTrackingScreen = ({route}) => {
           <View style={styles.modalBox}>
             <Text style={styles.modalTitle2}>Enter OTP</Text>
             <Text style={styles.modalMessage}>Enter the customer's OTP to complete delivery.</Text>
+            {__DEV__ && /^\d{4}$/.test(String(orderDetails.customer_otp ?? '')) && (
+              <Text style={styles.modalMessage} selectable>
+                Test delivery OTP: {String(orderDetails.customer_otp)}
+              </Text>
+            )}
             <View style={styles.otpRow}>
               {otp.map((digit, index) => (
                 <TextInput

@@ -36,9 +36,10 @@ const AccountsScreen = () => {
       setLoading(true);
       setError(false);
       const response = await ApiService.getReportingHistory(user?.id);
-      if (response?.status !== 200) throw new Error(response?.message || 'Failed to fetch accounts.');
+      if (response?.status !== 200 || (response?.data?.status && response.data.status !== 200)) throw new Error(response?.message || 'Failed to fetch accounts.');
       const summary = response?.data?.data?.[0];
-      if (summary) {
+      // Aggregate queries return a row of nulls even when no orders match.
+      if (summary && Number(summary.total_orders) > 0) {
         const normalized = {...summary};
         ['total_amount', 'cod_amount', 'pay_online_amount', 'delivery_charges', 'total_deliveryboy_amount'].forEach(key => {
           if (normalized[key] != null) normalized[key] = Number(normalized[key]);
@@ -107,7 +108,7 @@ const AccountsScreen = () => {
             color={palette.border}
           />
           <Text style={styles.emptyText}>
-            No transactions found for this period
+            No completed orders awaiting payment. Your reporting period will appear after your first completed delivery.
           </Text>
         </View>
       ) : (
@@ -130,7 +131,7 @@ const AccountsScreen = () => {
             <View style={styles.dateRangeContent}>
               <Text style={styles.dateRangeLabel}>Reporting Period</Text>
               <Text style={styles.dateRangeText}>
-                {paymentSummary?.date_range?.replace(' - ', ' to ')}
+                {paymentSummary?.date_range?.replace(' - ', ' to ') || 'Dates unavailable'}
               </Text>
             </View>
           </View>

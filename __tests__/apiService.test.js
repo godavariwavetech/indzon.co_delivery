@@ -28,7 +28,7 @@ const cases = [
   ['getProfileData', [user], 'post', '/getprofiledata', user],
   ['updateProfileData', [{id: 'rider', avatar: 'base64'}], 'post', '/updateprofiledata', {id: 'rider', avatar: 'base64'}],
   ['completedorders', [{f_date: '2026-10-01', t_date: '2026-10-17', emp_id: 'rider'}], 'post', '/getordersdatewise', {f_date: '2026-10-01', t_date: '2026-10-17', emp_id: 'rider'}],
-  ['getPayments', [{fromDate: '2026-10-01', toDate: '2026-10-17', emp_id: 'rider'}], 'post', '/getpayments', {fromDate: '2026-10-01', toDate: '2026-10-17', emp_id: 'rider'}],
+  ['getPayments', [{fromDate: '2026-10-01', toDate: '2026-10-17', emp_id: 'rider'}], 'post', '/deliveryboypaymentreports', {fromdate: '2026-10-01', todate: '2026-10-17', deliveryboy_id: 'rider'}],
   ['getContactUs', [], 'post', '/application_common_api', []],
   ['getReportingHistory', ['rider'], 'post', '/deliveryboypayments', {deliveryboy_id: 'rider'}],
   ['getReports', ['rider', '2026-10-01', '2026-10-17'], 'post', '/deliveryboypaymentreports', {deliveryboy_id: 'rider', fromdate: '2026-10-01', todate: '2026-10-17'}],
@@ -36,8 +36,8 @@ const cases = [
   ['verifyMobileNumber', ['9000000000'], 'post', '/checkthemobilenumber', {number: '9000000000'}],
   ['resetPassword', ['9000000000', 'secret'], 'post', '/updatenewpassword', {number: '9000000000', password: 'secret'}],
   ['updateDriverStatus', [0, 'rider'], 'post', '/deliveryboyactivestatus', {active_status: 0, deliveryboy_id: 'rider'}],
-  ['getCODAmounts', ['rider'], 'post', '/getcodamounts', {deliveryboy_id: 'rider'}],
-  ['getCODSettledHistory', ['rider'], 'post', '/getcodsettledhistory', {deliveryboy_id: 'rider'}],
+  ['getCODAmounts', ['rider'], 'post', '/getdeliveryboycod', {deliveryboy_id: 'rider'}],
+  ['getCODSettledHistory', ['rider'], 'post', '/getdeliveryboycodsettled', {deliveryboy_id: 'rider'}],
 ];
 
 beforeEach(() => {
@@ -61,4 +61,33 @@ test.each(['acceptorders', 'vendorReceived', 'completedorder', 'updateProfileDat
 test('network failure cannot become a successful delivery', async () => {
   mockAdapter.mockRejectedValueOnce({request: {}});
   await expect(service.completedorder(complete)).rejects.toMatchObject({message: expect.stringContaining('Network error')});
+});
+
+test('COD records map the backend OTP, settlement date and order count', async () => {
+  mockAdapter.mockImplementationOnce(async config => ({
+    data: {status: 200, data: [{cod_otp: '4567', cod_amount: '120'}]}, status: 200, headers: {}, config,
+  }));
+  await expect(service.getCODAmounts('rider')).resolves.toEqual([
+    {cod_otp: '4567', cod_settlement_otp: '4567', cod_amount: '120'},
+  ]);
+  mockAdapter.mockImplementationOnce(async config => ({
+    data: {status: 200, data: [{settled_date: '2026-10-22', cod_count: '2'}]}, status: 200, headers: {}, config,
+  }));
+  await expect(service.getCODSettledHistory('rider')).resolves.toEqual([
+    {settled_date: '2026-10-22', settleddate: '2026-10-22', cod_count: '2', cod_orders: '2'},
+  ]);
+});
+
+test.each(['getCODAmounts', 'getCODSettledHistory', 'getPayments'])('%s rejects backend application failures instead of displaying empty records', async name => {
+  mockAdapter.mockImplementationOnce(async config => ({
+    data: {status: 500, msg: 'Records unavailable'}, status: 200, headers: {}, config,
+  }));
+  await expect(service[name](name === 'getPayments' ? {emp_id: 'rider'} : 'rider'))
+    .rejects.toMatchObject({message: 'Records unavailable'});
+});
+
+test('payments preserves the nested report envelope used by the backend', async () => {
+  const response = {status: 200, data: {status: 200, data: [{id: 12, total_payment_amount: '150', payment_date_time: '2026-10-22'}]}};
+  mockAdapter.mockImplementationOnce(async config => ({data: response, status: 200, headers: {}, config}));
+  await expect(service.getPayments({emp_id: 'rider', fromDate: '2026-10-01', toDate: '2026-10-22'})).resolves.toEqual(response);
 });

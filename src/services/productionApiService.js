@@ -49,6 +49,14 @@ const handleApiError = error => {
   }
 };
 
+// These delivery endpoints report application errors in a JSON envelope.
+const checkDeliveryResponse = data => {
+  if (data?.status && Number(data.status) !== 200) {
+    throw new Error(typeof data.msg === 'string' ? data.msg : data.message || 'Unable to load delivery records. Please try again.');
+  }
+  return data;
+};
+
 // API Functions
 const ApiService = {
   // 🔹 User Login
@@ -173,13 +181,16 @@ const ApiService = {
   // 🔹 Fetch Payments (New API Function)
   getPayments: async ({fromDate, toDate, emp_id}) => {
     try {
-      const response = await apiClient.post('/getpayments', {
-        fromDate,
-        toDate,
-        emp_id, // Include emp_id if required by API
+      const response = await apiClient.post('/deliveryboypaymentreports', {
+        fromdate: fromDate,
+        todate: toDate,
+        deliveryboy_id: emp_id,
       });
-      // console.log("Payments Response:", response.data);
-      return response.data;
+      const data = checkDeliveryResponse(response.data);
+      if (data?.data && !Array.isArray(data.data)) {
+        checkDeliveryResponse(data.data);
+      }
+      return data;
     } catch (error) {
       throw handleApiError(error);
     }
@@ -275,10 +286,14 @@ const ApiService = {
   },
   getCODAmounts: async (deliveryboy_id) => {
     try {
-      const response = await apiClient.post('/getcodamounts', {
+      const response = await apiClient.post('/getdeliveryboycod', {
         deliveryboy_id: deliveryboy_id,
       });
-      return response.data?.data;
+      const rows = checkDeliveryResponse(response.data)?.data;
+      return Array.isArray(rows) ? rows.map(row => ({
+        ...row,
+        cod_settlement_otp: row.cod_settlement_otp ?? row.cod_otp,
+      })) : [];
     } catch (error) {
       throw handleApiError(error);
     }
@@ -286,10 +301,15 @@ const ApiService = {
 
   getCODSettledHistory: async (deliveryboy_id) => {
     try {
-      const response = await apiClient.post('/getcodsettledhistory', {
+      const response = await apiClient.post('/getdeliveryboycodsettled', {
         deliveryboy_id: deliveryboy_id,
       });
-      return response.data?.data;
+      const rows = checkDeliveryResponse(response.data)?.data;
+      return Array.isArray(rows) ? rows.map(row => ({
+        ...row,
+        settleddate: row.settleddate ?? row.settled_date,
+        cod_orders: row.cod_orders ?? row.cod_count,
+      })) : [];
     } catch (error) {
       throw handleApiError(error);
     }

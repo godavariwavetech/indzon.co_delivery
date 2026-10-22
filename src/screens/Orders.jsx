@@ -135,7 +135,7 @@ const OrdersScreen = ({navigation}) => {
           setAvailabilityMessage(
             activeOrders.length >= 3
               ? 'You have 3 ongoing orders. Complete one to see new delivery requests.'
-              : response.cod_exceeded
+              : response.cod_exceeded && Number(response.pending_cod) > 0
                 ? 'Your COD limit has been reached. Settle your pending COD amount to receive new orders.'
                 : '',
           );

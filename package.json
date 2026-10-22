@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "android": "react-native run-android --port 8085",
+    "android:standalone": "react-native run-android --port 8085 --no-packager --extra-params=-PdemoStandalone=true",
     "ios": "react-native run-ios",
     "lint": "eslint .",
     "start": "react-native start --port 8085 --client-logs",

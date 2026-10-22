@@ -123,9 +123,9 @@ const PaymentsScreen = () => {
             keyExtractor={(item, index) => index.toString()}
             renderItem={({ item }) => (
               <View style={styles.paymentItem}>
-                <Text style={styles.paymentText}>Order ID: {item.order_id}</Text>
-                <Text style={styles.paymentText}>Amount: ₹{item.amount}</Text>
-                <Text style={styles.paymentText}>Date: {item.date}</Text>
+                <Text style={styles.paymentText}>Payment ID: {item.id ?? item.order_id}</Text>
+                <Text style={styles.paymentText}>Amount: ₹{item.total_payment_amount ?? item.amount}</Text>
+                <Text style={styles.paymentText}>Date: {item.payment_date_time ?? item.date}</Text>
               </View>
             )}
           />

@@ -2,6 +2,36 @@
 
 Food Delivery Partner App Development
 
+## Run locally on Android
+
+To install an app that opens without Metro or a USB connection, run:
+
+```powershell
+npm.cmd run android:standalone
+```
+
+This bundles JavaScript into the APK using the existing `demoStandalone` build option. Re-run it after code changes. Backend features still require access to the configured API.
+
+For development with live code updates, use Metro:
+
+Connect your phone with USB debugging enabled, then run these commands from the project root in two terminals:
+
+```powershell
+# Terminal 1: keep Metro running (this project uses port 8085)
+npm.cmd run start
+
+# Terminal 2: build, install, and launch the development app
+npm.cmd run android
+```
+
+If the app reports "Unable to load script", check that Metro is running and reconnect the USB port forwarding:
+
+```powershell
+adb reverse tcp:8085 tcp:8085
+```
+
+Then reload the app. Use `npm.cmd run android` to replace an installed build that expects a bundled script with the development build. A development build needs Metro running; an APK for use without Metro must include its JavaScript bundle.
+
 ## Objective
 
 The goal of this project is to develop a mobile application for food delivery partners to manage their deliveries efficiently. The app will allow delivery partners to accept and track orders, update their availability status, navigate to restaurant and customer locations, and receive payments.

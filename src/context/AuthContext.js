@@ -1,5 +1,8 @@
 import React, { createContext, useState, useEffect } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import {DELIVERY_API_BASE_URL} from '../config/api';
+
+const USER_STORAGE_KEY = `user:${DELIVERY_API_BASE_URL}`;
 
 export const AuthContext = createContext();
 
@@ -11,7 +14,7 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const loadUser = async () => {
       try {
-        const storedUser = await AsyncStorage.getItem("user");
+        const storedUser = await AsyncStorage.getItem(USER_STORAGE_KEY);
         if (storedUser) {
           setUser(JSON.parse(storedUser));
         }
@@ -27,7 +30,7 @@ export const AuthProvider = ({ children }) => {
   // Function to set user details
   const login = async (userData) => {
     try {
-      await AsyncStorage.setItem("user", JSON.stringify(userData));
+      await AsyncStorage.setItem(USER_STORAGE_KEY, JSON.stringify(userData));
       setUser(userData);
     } catch (error) {
       console.error("Error saving user data:", error);
@@ -37,7 +40,7 @@ export const AuthProvider = ({ children }) => {
   // Function to remove user details (logout)
   const logout = async () => {
     try {
-      await AsyncStorage.removeItem("user");
+      await AsyncStorage.removeItem(USER_STORAGE_KEY);
       setUser(null);
     } catch (error) {
       console.error("Error clearing user data:", error);
