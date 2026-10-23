@@ -63,6 +63,13 @@ test('network failure cannot become a successful delivery', async () => {
   await expect(service.completedorder(complete)).rejects.toMatchObject({message: expect.stringContaining('Network error')});
 });
 
+test('login explains hosting failures returned as HTML', async () => {
+  mockAdapter.mockRejectedValueOnce({response: {status: 500, data: '<html>Web application could not be started</html>'}});
+  await expect(service.login('9000000000', 'secret')).rejects.toEqual({
+    message: 'The server is temporarily unavailable. Please try again later.',
+  });
+});
+
 test('COD records map the backend OTP, settlement date and order count', async () => {
   mockAdapter.mockImplementationOnce(async config => ({
     data: {status: 200, data: [{cod_otp: '4567', cod_amount: '120'}]}, status: 200, headers: {}, config,

@@ -36,6 +36,9 @@ const publicapiClient = axios.create({
 const handleApiError = error => {
   if (error.response) {
     const data = error.response.data;
+    if (error.response.status >= 500) {
+      return {message: 'The server is temporarily unavailable. Please try again later.'};
+    }
     return typeof data === 'object' && data !== null ? data : {message: 'Request failed. Please try again.'};
   } else if (error.request) {
     // console.error('Network Error:', error.request);
