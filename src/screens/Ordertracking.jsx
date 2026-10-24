@@ -412,6 +412,14 @@ const OrderTrackingScreen = ({route}) => {
   }
 
   const instructionDetails = orderItems?.orderdata?.[0];
+  const displayOrderId =
+    orderDetails.order_ids || instructionDetails?.order_ids ||
+    orderDetails.order_id || instructionDetails?.order_id ||
+    orderDetails.id || instructionDetails?.id || 'N/A';
+  const displayOrderDate = [
+    orderDetails.order_date || instructionDetails?.order_date,
+    orderDetails.order_time || instructionDetails?.order_time,
+  ].filter(Boolean).join(' at ');
   const orderInstructions = String(instructionDetails?.order_instructions || '').trim();
   const deliveryInstructions = String(instructionDetails?.delivery_instruction || '').trim();
 
@@ -432,9 +440,9 @@ const OrderTrackingScreen = ({route}) => {
       <ScrollView contentContainerStyle={styles.scrollContent}>
         {/* --- Order Info Header --- */}
         <View style={styles.orderHeader}>
-          <Text style={styles.orderId}>Order ID: {orderDetails.order_ids}</Text>
+          <Text style={styles.orderId}>Order ID: {displayOrderId}</Text>
           <Text style={styles.orderDate}>
-            {orderDetails?.order_date} at {orderDetails?.order_time}
+            Date: {displayOrderDate || 'N/A'}
           </Text>
         </View>
 

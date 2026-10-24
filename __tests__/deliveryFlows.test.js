@@ -42,6 +42,19 @@ const press = async label => {
   await act(async () => button.props.onPress());
 };
 
+test.each([
+  [{order_id: 'IN-42'}, {}, 'IN-42', 'N/A'],
+  [{id: 42}, {}, '42', 'N/A'],
+  [{order_id: 42}, {order_ids: 'IN-42', order_date: '24 Oct 2026'}, 'IN-42', '24 Oct 2026'],
+  [{order_ids: 'IN-42', order_date: '24 Oct 2026', order_time: '10:30 AM'}, {}, 'IN-42', '24 Oct 2026 at 10:30 AM'],
+])('order header shows available identifiers and a separate date (%j)', async (details, fetched, id, date) => {
+  service.getOrderDetails.mockResolvedValue({status: 200, data: {orderdata: [fetched], orderitemdata: []}});
+  await mount(<Tracking route={{params: {orderDetails: {...details, order_status: 1}}}} />);
+  const labels = tree.root.findAllByType(Text).map(node => React.Children.toArray(node.props.children).join(''));
+  expect(labels).toContain('Order ID: ' + id);
+  expect(labels).toContain('Date: ' + date);
+});
+
 test('accept, pickup and customer OTP send backend payloads before advancing', async () => {
   const accepted = jest.fn();
   const completed = jest.fn();
