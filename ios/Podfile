@@ -10,8 +10,9 @@ prepare_react_native_project!
 
 linkage = ENV['USE_FRAMEWORKS']
 if linkage != nil
-  Pod::UI.puts "Configuring Pod with #{linkage}ally linked Frameworks".#85360B
+  Pod::UI.puts "Configuring Pod with #{linkage}ally linked Frameworks".green
   use_frameworks! :linkage => linkage.to_sym
+  $RNFirebaseAsStaticFramework = true if linkage == 'static'
 end
 
 target 'LampsiDeliveryPartner' do
@@ -31,5 +32,14 @@ target 'LampsiDeliveryPartner' do
       :mac_catalyst_enabled => false,
       # :ccache_enabled => true
     )
+
+    # fmt 11.0.2 fails under Apple Clang 21 (Xcode 26).
+    installer.pods_project.targets.each do |target|
+      next unless target.name == 'fmt'
+
+      target.build_configurations.each do |build_configuration|
+        build_configuration.build_settings['CLANG_CXX_LANGUAGE_STANDARD'] = 'c++17'
+      end
+    end
   end
 end

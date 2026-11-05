@@ -1,0 +1,91 @@
+name: iOS TestFlight
+
+on:
+  push:
+    branches:
+      - ios-deployment
+  workflow_dispatch:
+
+concurrency:
+  group: ios-testflight-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  upload:
+    name: Build and upload to TestFlight
+    runs-on: macos-26
+    timeout-minutes: 90
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Check deployment secrets
+        env:
+          APP_STORE_CONNECT_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+          APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+          APP_STORE_CONNECT_KEY_BASE64: ${{ secrets.APP_STORE_CONNECT_KEY_BASE64 }}
+          IOS_BUNDLE_ID: ${{ secrets.IOS_BUNDLE_ID }}
+          IOS_TEAM_ID: ${{ secrets.IOS_TEAM_ID }}
+        run: |
+          set -euo pipefail
+          missing=()
+          for name in APP_STORE_CONNECT_KEY_ID APP_STORE_CONNECT_ISSUER_ID APP_STORE_CONNECT_KEY_BASE64 IOS_BUNDLE_ID IOS_TEAM_ID; do
+            if [[ -z "${!name:-}" ]]; then missing+=("$name"); fi
+          done
+          if (( ${#missing[@]} )); then
+            printf 'Missing GitHub Actions secrets: %s\n' "${missing[*]}" >&2
+            exit 1
+          fi
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.2'
+          bundler-cache: true
+
+      - name: Install JavaScript dependencies
+        run: npm ci --legacy-peer-deps
+
+      - name: Install CocoaPods dependencies
+        env:
+          USE_FRAMEWORKS: static
+        run: bundle exec pod install --project-directory=ios
+
+      - name: Build and upload
+        working-directory: ios
+        env:
+          BUNDLE_GEMFILE: ${{ github.workspace }}/Gemfile
+          APP_STORE_CONNECT_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+          APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+          APP_STORE_CONNECT_KEY_BASE64: ${{ secrets.APP_STORE_CONNECT_KEY_BASE64 }}
+          IOS_BUNDLE_ID: ${{ secrets.IOS_BUNDLE_ID }}
+          IOS_TEAM_ID: ${{ secrets.IOS_TEAM_ID }}
+        run: bundle exec fastlane beta --verbose
+
+      - name: Upload IPA
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: IndzonDelivery-ipa
+          path: build/ios/*.ipa
+          retention-days: 14
+
+      - name: Upload build logs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: IndzonDelivery-build-logs
+          path: |
+            ~/Library/Logs/gym
+            ~/Library/Logs/fastlane
+          retention-days: 7
