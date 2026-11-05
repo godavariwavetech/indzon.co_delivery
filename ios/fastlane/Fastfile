@@ -62,7 +62,6 @@ platform :ios do
       output_directory: '../build/ios',
       output_name: 'IndzonDelivery.ipa',
       xcargs: auth_args,
-      export_xcargs: auth_args,
       export_options: {
         signingStyle: 'automatic',
         teamID: team_id
