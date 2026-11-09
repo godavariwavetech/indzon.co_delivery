@@ -1,6 +1,6 @@
 import React, {useEffect} from 'react';
 import {listenForNotifications, requestNotificationPermission} from './src/NotificationService';
-import {SafeAreaView} from 'react-native';
+import {GestureHandlerRootView} from 'react-native-gesture-handler';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 import AppNavigator from './src/navigation/AppNavigator';
 import {AuthProvider} from './src/context/AuthContext';
@@ -12,13 +12,13 @@ const App = () => {
     return unsubscribe;
   }, []);
   return (
-  <SafeAreaProvider>
-    <SafeAreaView style={{flex: 1}}>
-      <AuthProvider>
-        <AppNavigator />
-      </AuthProvider>
-    </SafeAreaView>
-  </SafeAreaProvider>
+    <SafeAreaProvider>
+      <GestureHandlerRootView style={{flex: 1}}>
+        <AuthProvider>
+          <AppNavigator />
+        </AuthProvider>
+      </GestureHandlerRootView>
+    </SafeAreaProvider>
   );
 };
 export default App;
