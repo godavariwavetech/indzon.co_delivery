@@ -1,13 +1,26 @@
 import messaging from '@react-native-firebase/messaging';
+import firebase from '@react-native-firebase/app';
 import notifee, {AndroidImportance} from '@notifee/react-native';
 import {Platform} from 'react-native';
 
+// Firebase is only configured when GoogleService-Info.plist / google-services.json
+// is bundled. Calling messaging() without a default app crashes on iOS at launch.
+const firebaseReady = () => {
+  try {
+    return firebase.apps.some(app => app.name === '[DEFAULT]');
+  } catch (error) {
+    return false;
+  }
+};
+
 export const requestNotificationPermission = async () => {
   await notifee.requestPermission();
+  if (!firebaseReady()) return;
   await messaging().requestPermission();
 };
 
 export const getTokenValue = async () => {
+  if (!firebaseReady()) return null;
   await messaging().setAutoInitEnabled(true);
   if (Platform.OS === 'ios' && !messaging().isDeviceRegisteredForRemoteMessages) {
     await messaging().registerDeviceForRemoteMessages();
@@ -32,6 +45,7 @@ const displayMessage = async remoteMessage => {
 };
 
 export const listenForNotifications = () => {
+  if (!firebaseReady()) return () => {};
   try {
     return messaging().onMessage(message => {
       displayMessage(message).catch(error => console.error('Notification failed:', error.message));
@@ -44,6 +58,7 @@ export const listenForNotifications = () => {
 
 export const getFCMToken = getTokenValue;
 export const onTokenRefresh = handler => {
+  if (!firebaseReady()) return () => {};
   try { return messaging().onTokenRefresh(handler); }
   catch (error) {
     console.error('Push token listener failed:', error.message);
