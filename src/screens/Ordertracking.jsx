@@ -38,6 +38,7 @@ const theme = {
     textSecondary: palette.textSecondary, // Greyish Blue
     border: palette.border,
     success: palette.success,
+    danger: palette.danger,
     lightBlue: palette.primary,
   },
   spacing: {
@@ -295,60 +296,66 @@ const OrderTrackingScreen = ({route}) => {
   );
 
   const ProgressTracker = () => {
+    const isRejected = Number(orderStatus) === 5;
     const isAccepted =
-      orderStatus === 8 || orderStatus === 2 || orderStatus === 3;
-    const isDelivered = orderStatus === 3;
+      [8, 2, 3].includes(Number(orderStatus));
+    const isDelivered = Number(orderStatus) === 3;
+    const steps = isRejected
+      ? [
+          {label: 'New Order', icon: 'checkmark-circle'},
+          {label: 'Rejected', icon: 'close-circle'},
+        ]
+      : [
+          {label: 'New Order', icon: 'checkmark-circle'},
+          {label: 'Accepted', icon: 'bicycle'},
+          {label: 'Delivered', icon: 'location-sharp'},
+        ];
 
     return (
-
       <View style={styles.progressContainer}>
-        <View style={styles.progressStep}>
-          <Icon
-            name="checkmark-circle"
-            size={24}
-            color={theme.colors.primary}
-          />
-          <Text style={[styles.progressLabel, {color: theme.colors.primary}]}>
-            New Order
-          </Text>
-        </View>
-        <View
-          style={[styles.progressLine, isAccepted && styles.progressLineActive]}
-        />
-        <View style={styles.progressStep}>
-          <Icon
-            name="bicycle"
-            size={24}
-            color={isAccepted ? theme.colors.primary : theme.colors.border}
-          />
-          <Text
-            style={[
-              styles.progressLabel,
-              isAccepted && {color: theme.colors.primary},
-            ]}>
-            Accepted
-          </Text>
-        </View>
-        <View
-          style={[
-            styles.progressLine,
-            isDelivered && styles.progressLineActive,
-          ]}
-        />
-        <View style={styles.progressStep}>
-          <Icon
-            name="location-sharp"
-            size={24}
-            color={isDelivered ? theme.colors.primary : theme.colors.border}
-          />
-          <Text
-            style={[
-              styles.progressLabel,
-              isDelivered && {color: theme.colors.primary},
-            ]}>
-            Delivered
-          </Text>
-        </View>
+        {steps.map((step, index) => {
+          const isActive =
+            step.label === 'New Order' ||
+            (step.label === 'Accepted' && isAccepted) ||
+            (step.label === 'Delivered' && isDelivered) ||
+            (step.label === 'Rejected' && isRejected);
+          const color =
+            isActive && step.label === 'Rejected'
+              ? theme.colors.danger
+              : isActive
+              ? theme.colors.primary
+              : theme.colors.border;
+          const nextStep = steps[index + 1];
+          const isLineActive =
+            nextStep?.label === 'Rejected'
+              ? isRejected
+              : nextStep?.label === 'Accepted'
+              ? isAccepted
+              : nextStep?.label === 'Delivered' && isDelivered;
+
+          return (
+            <React.Fragment key={step.label}>
+              <View style={styles.progressStep}>
+                <Icon name={step.icon} size={24} color={color} />
+                <Text style={[styles.progressLabel, {color}]}>
+                  {step.label}
+                </Text>
+              </View>
+              {nextStep && (
+                <View
+                  style={[
+                    styles.progressLine,
+                    isLineActive && styles.progressLineActive,
+                    isLineActive &&
+                      nextStep.label === 'Rejected' && {
+                        backgroundColor: theme.colors.danger,
+                      },
+                  ]}
+                />
+              )}
+            </React.Fragment>
+          );
+        })}
       </View>
     );
   };
@@ -511,6 +518,13 @@ const OrderTrackingScreen = ({route}) => {
                 }
                 mapHint={true}
               />
+              {/^\d{4}$/.test(String(orderDetails.customer_otp ?? '')) && (
+                <DetailRow
+                  icon="keypad-outline"
+                  label="Delivery OTP"
+                  value={String(orderDetails.customer_otp)}
+                />
+              )}
             </InfoCard>
 
             <InfoCard title="Restaurant Details" icon="storefront-outline">
