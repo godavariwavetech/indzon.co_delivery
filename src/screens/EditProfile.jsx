@@ -101,8 +101,8 @@ const EditProfileScreen = () => {
   return (
     <>
       <View style={styles.header}>
-        <TouchableOpacity style={styles.backButton} onPress={() => navigation.openDrawer()}>
-          <MaterialIcons name="menu" size={30} color="white" />
+        <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+          <MaterialIcons name="arrow-back" size={26} color="white" />
         </TouchableOpacity>
         <Text style={styles.headerText}>Edit Profile</Text>
       </View>

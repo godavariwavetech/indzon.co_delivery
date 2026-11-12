@@ -116,8 +116,11 @@ const ForgotPassword = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <StatusBar backgroundColor={palette.surface} barStyle="dark-content" />
+      <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+        <Icon name="arrow-left" size={26} color={palette.text} />
+      </TouchableOpacity>
       <Image
-        source={require('../assets/foodtrail_delivery.png')}
+        source={require('../assets/indzon-logo.png')}
         style={styles.logo}
         resizeMode="contain"
       />
@@ -237,6 +240,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: moderateScale(20),
+  },
+  backButton: {
+    position: 'absolute',
+    top: verticalScale(40),
+    left: moderateScale(15),
+    zIndex: 1,
+    padding: moderateScale(5),
   },
   logo: {
     width: 200,
