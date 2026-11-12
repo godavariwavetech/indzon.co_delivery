@@ -69,6 +69,6 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     interfaceOrientation previousInterfaceOrientation: UIInterfaceOrientation,
     traitCollection previousTraitCollection: UITraitCollection
   ) {
-    NotificationCenter.default.post(name: NSNotification.Name(RCTWindowFrameDidChangeNotification), object: self)
+    NotificationCenter.default.post(name: RCTWindowFrameDidChangeNotification, object: self)
   }
 }
