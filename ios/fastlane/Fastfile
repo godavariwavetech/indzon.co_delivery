@@ -21,6 +21,28 @@ platform :ios do
       is_key_content_base64: false
     )
 
+    # Each CI runner starts with an empty keychain, so Xcode creates a new
+    # development certificate via the API key on every build. Revoke the ones
+    # previous CI runs created so the account doesn't hit its certificate limit.
+    if ENV['CI']
+      Spaceship::ConnectAPI.token = Spaceship::ConnectAPI::Token.from(hash: api_key)
+      dev_types = [
+        Spaceship::ConnectAPI::Certificate::CertificateType::DEVELOPMENT,
+        Spaceship::ConnectAPI::Certificate::CertificateType::IOS_DEVELOPMENT
+      ]
+      Spaceship::ConnectAPI::Certificate.all.each do |cert|
+        next unless dev_types.include?(cert.certificate_type)
+        next unless cert.name.to_s.include?('Created via API')
+
+        UI.message("Revoking CI-created certificate #{cert.display_name} (#{cert.id})")
+        begin
+          cert.delete!
+        rescue StandardError => e
+          UI.important("Could not revoke #{cert.id}: #{e.message}")
+        end
+      end
+    end
+
     key_file = File.join(Dir.tmpdir, "AuthKey_#{key_id}.p8")
     File.write(key_file, key_content)
 
