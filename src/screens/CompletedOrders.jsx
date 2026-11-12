@@ -3,7 +3,7 @@ import React, { useState, useEffect, useContext, useCallback } from 'react';
 import { View, Text, TouchableOpacity, FlatList, Image, StyleSheet, TextInput, ActivityIndicator,Alert,Linking,PermissionsAndroid } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import DateTimePicker from '@react-native-community/datetimepicker';
+import DatePickerModal, {parseDayMonthYear, formatDayMonthYear} from '../components/DatePickerModal';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import Separator from '../components/Separator';
 import { AuthContext } from "../context/AuthContext";
@@ -16,11 +16,9 @@ import { useFocusEffect } from '@react-navigation/native';
 const DatePickerField = ({ label, value, onChange }) => {
   const [showPicker, setShowPicker] = useState(false);
 
-  const handleDateChange = (event, selectedDate) => {
+  const handleConfirm = selectedDate => {
     setShowPicker(false);
-    if (selectedDate) {
-      onChange(selectedDate.toLocaleDateString("en-GB").split("/").join("-")); // Format date as YYYY-MM-DD
-    }
+    onChange(formatDayMonthYear(selectedDate));
   };
 
   return (
@@ -33,20 +31,19 @@ const DatePickerField = ({ label, value, onChange }) => {
           placeholderTextColor="black"
           value={value}
           editable={false}
+          pointerEvents="none"
         />
         < >
           <Ionicons name="calendar-outline" size={25} color="black" />
         </>
       </View>
-      {showPicker && (
-        <DateTimePicker
-          value={new Date()}
-          mode="date"
-          display="default"
-          onChange={handleDateChange}
-          maximumDate={new Date()} // **Disable future dates**
-        />
-      )}
+      <DatePickerModal
+        visible={showPicker}
+        value={parseDayMonthYear(value)}
+        onConfirm={handleConfirm}
+        onCancel={() => setShowPicker(false)}
+        maximumDate={new Date()}
+      />
     </TouchableOpacity>
   );
 };

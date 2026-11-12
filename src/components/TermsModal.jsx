@@ -31,7 +31,7 @@ const TermsModal = ({ visible, onClose }) => {
 
             <Text style={styles.heading}>1. Introduction and Acceptance of Terms</Text>
             <Text style={styles.paragraph}>
-              Welcome to Amaraa Delivery ("the App"), a technology platform provided by [Your Company Name] ("Company," "we," "us," or "our"). By using the App, you agree to be bound by these Terms and Conditions.
+              Welcome to INDZON Delivery ("the App"), a technology platform provided by INDZON ("Company," "we," "us," or "our"). By using the App, you agree to be bound by these Terms and Conditions.
             </Text>
 
             <Text style={styles.heading}>2. Relationship of the Parties</Text>

@@ -8,7 +8,7 @@ import { AuthContext } from '../context/AuthContext';
 import ApiService from '../services/apiservice';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import Ionicons  from 'react-native-vector-icons/Ionicons';
-import DateTimePicker from '@react-native-community/datetimepicker';
+import DatePickerModal from '../components/DatePickerModal';
 
 const ReportsScreen = () => {
   const { user } = useContext(AuthContext);
@@ -154,18 +154,15 @@ const ReportsScreen = () => {
     </View>
   );
 
-  const handleStartDateChange = (event, selectedDate) => {
+  const handleStartDateChange = selectedDate => {
     setShowStartPicker(false);
-    if (selectedDate) {
-      setStartDate(selectedDate);
-    }
+    setStartDate(selectedDate);
+    if (selectedDate > endDate) setEndDate(selectedDate);
   };
 
-  const handleEndDateChange = (event, selectedDate) => {
+  const handleEndDateChange = selectedDate => {
     setShowEndPicker(false);
-    if (selectedDate) {
-      setEndDate(selectedDate);
-    }
+    setEndDate(selectedDate);
   };
 
 
@@ -211,23 +208,19 @@ const ReportsScreen = () => {
         </TouchableOpacity>
       </View>
 
-      {showStartPicker && (
-        <DateTimePicker
-          value={startDate}
-          mode="date"
-          display="default"
-          onChange={handleStartDateChange}
-        />
-      )}
-      {showEndPicker && (
-        <DateTimePicker
-          value={endDate}
-          mode="date"
-          display="default"
-          onChange={handleEndDateChange}
-          minimumDate={startDate}
-        />
-      )}
+      <DatePickerModal
+        visible={showStartPicker}
+        value={startDate}
+        onConfirm={handleStartDateChange}
+        onCancel={() => setShowStartPicker(false)}
+      />
+      <DatePickerModal
+        visible={showEndPicker}
+        value={endDate}
+        onConfirm={handleEndDateChange}
+        onCancel={() => setShowEndPicker(false)}
+        minimumDate={startDate}
+      />
 
       {loading ? (
         <View style={styles.loaderContainer}>

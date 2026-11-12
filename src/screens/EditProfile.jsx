@@ -229,6 +229,9 @@ const styles = StyleSheet.create({
     borderRadius: hp("3%"),
     paddingHorizontal: wp("4%"),
     marginBottom: hp("2%"),
+    minHeight: 52,
+    borderWidth: 1,
+    borderColor: palette.border,
     elevation: 0,
   },
   icon: {
@@ -238,5 +241,7 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: hp("2%"),
     color: "#000",
+    // iOS TextInput has no intrinsic padding, which squashed the fields.
+    paddingVertical: 14,
   },
 });

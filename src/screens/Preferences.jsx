@@ -42,14 +42,19 @@ export default function Preferences({navigation, route}) {
         </TouchableOpacity>
         <Text style={styles.title}>{route.name}</Text>
       </View>
-      <ScrollView contentContainerStyle={styles.content} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} />}>
+      <ScrollView contentContainerStyle={[styles.content, notifications && !items.length && styles.emptyContent]} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} />}>
         {notifications ? (
           items.length ? items.map(item => (
             <TouchableOpacity key={item.id} style={styles.card} onPress={() => Alert.alert(item.title || 'Notification', item.body)}>
               <Text style={styles.cardTitle}>{item.title}</Text>
               <Text style={styles.body}>{item.body}</Text>
             </TouchableOpacity>
-          )) : <View style={styles.card}><Text style={styles.body}>No active notifications</Text></View>
+          )) : (
+            <View style={styles.empty}>
+              <Ionicons name="notifications-off-outline" size={56} color={palette.textMuted} />
+              <Text style={styles.emptyText}>No active notifications</Text>
+            </View>
+          )
         ) : (
           <>
             <View style={styles.card}>
@@ -91,4 +96,7 @@ const styles = StyleSheet.create({
   caption: {fontSize: 12, color: '#777', marginTop: 12},
   row: {flexDirection: 'row', alignItems: 'center'},
   description: {flex: 1},
+  emptyContent: {flexGrow: 1, justifyContent: 'center'},
+  empty: {alignItems: 'center', justifyContent: 'center'},
+  emptyText: {fontSize: 16, color: palette.textSecondary, marginTop: 12, textAlign: 'center'},
 });

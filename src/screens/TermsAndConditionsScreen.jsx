@@ -29,7 +29,7 @@ const TermsAndConditionsScreen = ({ navigation }) => {
 
         <Text style={styles.heading}>1. Introduction and Acceptance of Terms</Text>
         <Text style={styles.paragraph}>
-          Welcome to Amaraa Delivery ("the App"), a technology platform provided by [Your Company Name] ("Company," "we," "us," or "our"). This App provides a platform to connect independent delivery professionals ("Driver," "you," "your") with restaurants and other businesses ("Partners") to facilitate the pickup and delivery of orders to customers ("Customers"). By downloading, installing, accessing, or using the Amaraa Delivery App, you agree to be bound by these Terms and Conditions ("Terms") and our Privacy Policy. If you do not agree to these Terms, you must not use the App.
+          Welcome to INDZON Delivery ("the App"), a technology platform provided by INDZON ("Company," "we," "us," or "our"). This App provides a platform to connect independent delivery professionals ("Driver," "you," "your") with restaurants and other businesses ("Partners") to facilitate the pickup and delivery of orders to customers ("Customers"). By downloading, installing, accessing, or using the INDZON Delivery App, you agree to be bound by these Terms and Conditions ("Terms") and our Privacy Policy. If you do not agree to these Terms, you must not use the App.
         </Text>
 
         <Text style={styles.heading}>2. Relationship of the Parties</Text>
@@ -44,7 +44,7 @@ const TermsAndConditionsScreen = ({ navigation }) => {
 
         <Text style={styles.heading}>3. Driver Requirements & Obligations</Text>
         <Text style={styles.paragraph}>
-          To use the Amaraa Delivery App, you represent and warrant that you:
+          To use the INDZON Delivery App, you represent and warrant that you:
           {'\n\n'}- Are at least 18 years of age.
           {'\n'}- Hold a valid driver's license for the type of vehicle you operate.
           {'\n'}- Possess valid vehicle registration and a policy of motor vehicle liability insurance that meets or exceeds the minimum legal requirements.

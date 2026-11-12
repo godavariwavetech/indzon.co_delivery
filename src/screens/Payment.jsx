@@ -13,7 +13,7 @@ import {
   Alert,
   ActivityIndicator
 } from 'react-native';
-import DateTimePicker from '@react-native-community/datetimepicker';
+import DatePickerModal, {parseDayMonthYear, formatDayMonthYear} from '../components/DatePickerModal';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { useNavigation } from '@react-navigation/native';
@@ -27,11 +27,9 @@ const { width } = Dimensions.get('window');
 const DatePickerField = ({ label, value, onChange }) => {
   const [showPicker, setShowPicker] = useState(false);
 
-  const handleDateChange = (event, selectedDate) => {
+  const handleConfirm = selectedDate => {
     setShowPicker(false);
-    if (selectedDate) {
-      onChange(selectedDate.toLocaleDateString("en-GB").split("/").join("-")); // Format: YYYY-MM-DD
-    }
+    onChange(formatDayMonthYear(selectedDate));
   };
 
   return (
@@ -44,20 +42,19 @@ const DatePickerField = ({ label, value, onChange }) => {
           placeholderTextColor="black"
           value={value}
           editable={false}
+          pointerEvents="none"
         />
         < >
           <Ionicons name="calendar-outline" size={25} color="black" />
         </>
       </View>
-      {showPicker && (
-        <DateTimePicker
-          value={new Date()}
-          mode="date"
-          display="default"
-          onChange={handleDateChange}
-          maximumDate={new Date()} // **Disable future dates**
-        />
-      )}
+      <DatePickerModal
+        visible={showPicker}
+        value={parseDayMonthYear(value)}
+        onConfirm={handleConfirm}
+        onCancel={() => setShowPicker(false)}
+        maximumDate={new Date()}
+      />
     </TouchableOpacity>
   );
 };
