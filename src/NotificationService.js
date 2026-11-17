@@ -21,6 +21,7 @@ export const requestNotificationPermission = async () => {
 
 export const getTokenValue = async () => {
   if (!firebaseReady()) return null;
+  await requestNotificationPermission();
   await messaging().setAutoInitEnabled(true);
   if (Platform.OS === 'ios' && !messaging().isDeviceRegisteredForRemoteMessages) {
     await messaging().registerDeviceForRemoteMessages();
