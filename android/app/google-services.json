@@ -1,21 +1,21 @@
 {
   "project_info": {
-    "project_number": "936864353739",
-    "project_id": "varadhifoods",
-    "storage_bucket": "varadhifoods.firebasestorage.app"
+    "project_number": "563425346998",
+    "project_id": "indzon-1d3c2",
+    "storage_bucket": "indzon-1d3c2.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:936864353739:android:e6a846fb4b1717fab2ba4e",
+        "mobilesdk_app_id": "1:563425346998:android:3eee4b8585e6eee37f2d17",
         "android_client_info": {
-          "package_name": "com.indzon.delivery"
+          "package_name": "com.indzon"
         }
       },
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyCfLeUcg3a_pQJWR1IvEB_q3eN7BFei5iw"
+          "current_key": "AIzaSyD4p3duX646OEn-qjp-CpvXALVEtmqvhxI"
         }
       ],
       "services": {
@@ -26,15 +26,34 @@
     },
     {
       "client_info": {
-        "mobilesdk_app_id": "1:936864353739:android:6cca295d63d3250fb2ba4e",
+        "mobilesdk_app_id": "1:563425346998:android:e17a4fa59d0fea947f2d17",
         "android_client_info": {
-          "package_name": "com.varadhipartner"
+          "package_name": "com.indzon.delivery"
         }
       },
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyCfLeUcg3a_pQJWR1IvEB_q3eN7BFei5iw"
+          "current_key": "AIzaSyD4p3duX646OEn-qjp-CpvXALVEtmqvhxI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:563425346998:android:5ded4f7c7889bdf67f2d17",
+        "android_client_info": {
+          "package_name": "com.indzon.vendor"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD4p3duX646OEn-qjp-CpvXALVEtmqvhxI"
         }
       ],
       "services": {

@@ -172,10 +172,14 @@ const OrdersScreen = ({navigation}) => {
 
   useEffect(() => {
     if (!user?.id) return;
-    getTokenValue().then(token => token && ApiService.uploadFcmToken(
-      token, user.id, user.delivery_boy_location_id,
-    )).catch(error => console.error('Push registration failed:', error.message));
+    getTokenValue().then(token => {
+      console.log('📱 FCM player_id:', token);
+      return token && ApiService.uploadFcmToken(
+        token, user.id, user.delivery_boy_location_id,
+      );
+    }).catch(error => console.error('Push registration failed:', error.message));
     return onTokenRefresh(token => {
+      console.log('📱 FCM player_id refreshed:', token);
       ApiService.uploadFcmToken(token, user.id, user.delivery_boy_location_id)
         .catch(error => console.error('Push token refresh failed:', error.message));
     });
