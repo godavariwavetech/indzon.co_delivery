@@ -52,6 +52,10 @@
 	<string>Indzon saves photos you create to your photo library.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Indzon uses your photo library to attach images to delivery operations.</string>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>remote-notification</string>
+	</array>
 	<key>UIAppFonts</key>
 	<array>
 		<string>AntDesign.ttf</string>

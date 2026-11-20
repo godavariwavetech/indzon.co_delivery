@@ -36,7 +36,7 @@ const ProfileStack = () => {
 
 const DrawerNavigator = () => {
   return (
-    <SafeAreaView style={{flex: 1, backgroundColor: palette.primary}}>
+    <SafeAreaView edges={['top']} style={{flex: 1, backgroundColor: palette.primary}}>
       <Drawer.Navigator
         initialRouteName="Home"
         screenOptions={{
