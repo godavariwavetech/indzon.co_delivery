@@ -23,8 +23,24 @@ export const getTokenValue = async () => {
   if (!firebaseReady()) return null;
   await requestNotificationPermission();
   await messaging().setAutoInitEnabled(true);
-  if (Platform.OS === 'ios' && !messaging().isDeviceRegisteredForRemoteMessages) {
-    await messaging().registerDeviceForRemoteMessages();
+  if (Platform.OS === 'ios') {
+    if (!messaging().isDeviceRegisteredForRemoteMessages) {
+      await messaging().registerDeviceForRemoteMessages();
+    }
+    // messaging().getToken() can hang indefinitely on iOS until Apple's
+    // APNs device token has actually arrived - wait for it (briefly) first.
+    for (
+      let attempt = 0;
+      attempt < 10 && !(await messaging().getAPNSToken());
+      attempt += 1
+    ) {
+      await new Promise(resolve => setTimeout(resolve, 500));
+    }
+    // Belt-and-suspenders: never let a never-resolving getToken() block the caller forever.
+    return Promise.race([
+      messaging().getToken(),
+      new Promise(resolve => setTimeout(() => resolve(null), 8000)),
+    ]);
   }
   return messaging().getToken();
 };
